@@ -11,7 +11,7 @@ def health():
     """Report whether the API and its database are reachable."""
     try:
         db.session.execute(text("SELECT 1"))
-    except Exception:
+    except Exception:  # noqa: BLE001 - any failure means the DB is unhealthy
         # Roll back so the session is usable again for the next request.
         db.session.rollback()
         return jsonify({"status": "ok", "database": "error"}), 503
