@@ -12,6 +12,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ secrets.STAGING_HOST != '' && secrets.STAGING_USER != '' && secrets.STAGING_SSH_KEY != '' }}
     steps:
       - name: Prepare SSH
         run: |
