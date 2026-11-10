@@ -21,7 +21,7 @@ def role_required(*roles):
     """
 
     def decorator(view):
-        
+       @wraps(view) 
         def wrapper(*args, **kwargs):
             verify_jwt_in_request()
             user = db.session.get(User, int(get_jwt_identity()))
