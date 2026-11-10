@@ -9,7 +9,7 @@ from ..extensions import db
 from ..models import Driver, User
 from .decorators import current_user, role_required
 
-auth_bp = Blueprint("auth", __name__)
+
 
 MIN_PASSWORD = 8
 MAX_PASSWORD = 128
