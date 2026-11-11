@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, UTC, UTC
+from datetime import UTC, datetime
 
 from ..extensions import db
 
