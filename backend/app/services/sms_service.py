@@ -47,9 +47,9 @@ def send(phone, message):
         if not ok:
             log.warning("SMS to %s not accepted: %s", _mask(phone), body)
         return ok
-    except Exception as err:  # an SMS problem must never break a booking
-        log.warning("SMS to %s failed: %s", _mask(phone), err)
-        return False
+    except (OSError, json.JSONDecodeError) as err:
+    log.warning("SMS to %s failed: %s", _mask(phone), err)
+    return False
 
 
 def booking_confirmed(booking):
