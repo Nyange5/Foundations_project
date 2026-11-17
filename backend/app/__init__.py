@@ -3,10 +3,10 @@ import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
 
+from .auth.decorators import register_jwt_errors
 from .config import CONFIGS
 from .errors import register_error_handlers
 from .extensions import db, migrate
-from .auth.decorators import register_jwt_errors
 
 
 def create_app(config_name=None):
