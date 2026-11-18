@@ -658,15 +658,52 @@ a {
   font-size: 0.875rem;
   border-top: 1px solid rgb(255 255 255 / 0.14);
 }
-.footer-inner {
+.footer-top {
   display: grid;
-  gap: 0.5rem;
-  padding-top: 2rem;
+  gap: 2rem;
+  padding-top: 3rem;
   padding-bottom: 2.5rem;
 }
 .footer .brand {
   color: var(--white);
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+}
+.footer-brand p {
+  margin-top: 0.5rem;
+  max-width: 18rem;
+}
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem 1.5rem;
+}
+.footer h2 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.75rem;
+}
+.footer ul {
+  display: grid;
+  gap: 0.5rem;
+}
+.footer a {
+  text-decoration: none;
+  transition: color 150ms ease-out;
+}
+.footer a:hover {
+  color: var(--white);
+}
+.footer :focus-visible {
+  outline-color: var(--white);
+}
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.75rem;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
 }
 
 /* ---------- Larger screens ---------- */
@@ -709,10 +746,14 @@ a {
   .drive-cols {
     grid-template-columns: 1fr 1fr;
   }
-  .footer-inner {
-    grid-template-columns: auto 1fr;
-    align-items: baseline;
-    gap: 1.5rem;
+  .footer-top {
+    grid-template-columns: 1fr auto;
+    gap: 4rem;
+    padding-top: 4rem;
+  }
+  .footer-cols {
+    grid-template-columns: repeat(3, minmax(9rem, auto));
+    gap: 3rem;
   }
 }
 
@@ -866,6 +907,7 @@ a {
   grid-column: 1 / -1;
   margin-top: 0.5rem;
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
@@ -959,6 +1001,393 @@ a {
 .loading {
   margin-top: 1.5rem;
   color: var(--gray-500);
+}
+
+/* Booking statuses */
+.status-pending {
+  background: var(--gray-200);
+  color: var(--black);
+}
+.status-approved,
+.status-confirmed {
+  background: var(--black);
+  color: var(--white);
+}
+.status-rejected {
+  background: var(--white);
+  color: var(--bad);
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+.result-wide {
+  grid-column: 1 / -1;
+}
+
+/* Payment */
+.countdown {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.countdown.is-urgent {
+  color: var(--bad);
+}
+.cancel-note {
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+.link-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  color: inherit;
+  cursor: pointer;
+}
+.password-login {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--gray-200);
+}
+.password-login summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+/* Seat map */
+.seatmap-box {
+  display: grid;
+  gap: 0.75rem;
+}
+.seatmap-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+.seatmap-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8125rem;
+  color: var(--gray-700);
+}
+.seatmap-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.seat-key {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 4px;
+  border: 2px solid var(--black);
+  background: var(--white);
+}
+.seat-key.is-chosen {
+  background: var(--black);
+}
+.seat-key.is-taken {
+  border-color: var(--gray-200);
+  background: var(--gray-200);
+}
+.seatmap {
+  justify-self: center;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 2px solid var(--gray-200);
+  border-radius: 2rem 2rem 1rem 1rem;
+  background: var(--gray-50);
+}
+.seatmap.is-bus {
+  border-radius: 1.25rem 1.25rem 0.75rem 0.75rem;
+}
+.seat-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+.seat,
+.seat-gap {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+}
+.seat {
+  border: 2px solid var(--black);
+  border-radius: 0.6rem 0.6rem 0.4rem 0.4rem;
+  background: var(--white);
+  color: var(--black);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 120ms ease-out, transform 120ms ease-out;
+}
+.seat:hover:not(:disabled) {
+  background: var(--gray-100);
+}
+.seat:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.seat.is-chosen {
+  background: var(--black);
+  color: var(--white);
+}
+.seat.is-taken {
+  border-color: var(--gray-200);
+  background: var(--gray-200);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+.seat.is-driver {
+  display: grid;
+  place-items: center;
+  border-color: var(--gray-200);
+  background: transparent;
+  color: var(--gray-500);
+  font-size: 0.625rem;
+  font-weight: 500;
+  cursor: default;
+}
+.seat:disabled.is-chosen {
+  cursor: default;
+}
+
+/* Car photos */
+.car-photos {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.car-photos img {
+  flex: none;
+  width: 100%;
+  max-width: 28rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  scroll-snap-align: start;
+  background: var(--gray-100);
+}
+.car-photos img:only-child {
+  max-width: 100%;
+}
+.result-photo {
+  grid-column: 1 / -1;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+  background: var(--gray-100);
+}
+@media (min-width: 40rem) {
+  /* Wider screens: the photo as a thumbnail on the left of the details. */
+  .result.has-photo {
+    grid-template-columns: 9rem 1fr auto;
+    column-gap: 1.25rem;
+  }
+  .result.has-photo .result-photo {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    margin-bottom: 0;
+    align-self: stretch;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .result.has-photo .result-actions {
+    grid-column: 2 / -1;
+  }
+}
+.vehicle-photos {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.vehicle-photos figure {
+  position: relative;
+}
+.vehicle-photos img {
+  width: 6.5rem;
+  height: 4.9rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+.vehicle-photos button {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.6875rem;
+  background: rgb(255 255 255 / 0.9);
+}
+.file-label input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.file-label:focus-within {
+  outline: 3px solid var(--black);
+  outline-offset: 2px;
+}
+
+/* Ticket */
+.ticket-card {
+  margin-top: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--black);
+  overflow: hidden;
+}
+.ticket-head {
+  background: var(--black);
+  color: var(--white);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.ticket-head strong {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+.ticket-body {
+  padding: 1.25rem;
+  display: grid;
+  gap: 1.25rem;
+}
+.ticket-qr {
+  justify-self: center;
+  width: 13rem;
+  max-width: 100%;
+}
+.ticket-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ticket-card .ticket {
+  margin: 0;
+  border-style: solid;
+}
+
+/* Ticket check (what a scanner sees) */
+.verdict {
+  margin-top: 1.5rem;
+  padding: 2rem 1.5rem;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  display: grid;
+  gap: 0.5rem;
+}
+.verdict strong {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.verdict.is-valid {
+  background: #0a7d32;
+  color: var(--white);
+}
+.verdict.is-invalid {
+  background: var(--bad);
+  color: var(--white);
+}
+
+/* Bus booking is a future phase: bus-only things show only when the API's
+   /api/config says it is on (api.js then adds .has-bus to <html>). */
+html:not(.has-bus) [data-feature="bus"],
+html:not(.has-demo) [data-feature="demo"] {
+  display: none !important;
+}
+.demo-login {
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--gray-200);
+  display: grid;
+  gap: 0.6rem;
+}
+.demo-login h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.demo-login p {
+  color: var(--gray-700);
+  font-size: 0.9375rem;
+}
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.coming-soon {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+.sandbox-note {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+.waiting {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--gray-50);
+  border-left: 4px solid var(--black);
+}
+#result .form-foot a {
+  margin-right: 1rem;
+}
+
+/* Ticket and rating on My bookings */
+.ticket {
+  grid-column: 1 / -1;
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  background: var(--white);
+  border: 1px dashed var(--gray-200);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+}
+.ticket dt {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+.ticket dd {
+  margin: 0;
+  font-weight: 600;
+}
+.rate-form {
+  grid-column: 1 / -1;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-200);
+}
+.rate-title {
+  font-weight: 600;
+}
+.rate-form .mode span {
+  min-width: 2.75rem;
+  justify-content: center;
+}
+.rate-form .btn-black {
+  justify-self: start;
+}
+.rated {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
 }
 
 @media (min-width: 60rem) {
