@@ -8,12 +8,6 @@ from .extensions import db, jwt, migrate
 
 
 def create_app(config_name=None):
-    """Build and configure a Flask app.
-
-    config_name is "development", "testing" or "production". When it is not
-    given we read FLASK_ENV, and default to production so a missing variable
-    can never switch debug mode on by accident.
-    """
     config_name = config_name or os.environ.get("FLASK_ENV", "production")
     config = CONFIGS[config_name]
 
@@ -45,18 +39,18 @@ def create_app(config_name=None):
     from .routes.health import health_bp
     from .routes.payments import payments_bp
     from .routes.ratings import ratings_bp
-    from .routes.search import search_bp
-    from .routes.tickets import tickets_bp
+
+    # TODO: main also registers search_bp (app/routes/search.py) and
+    # tickets_bp (app/routes/tickets.py), but those files were never
+    # committed to any branch. Add them back here once they are pushed.
 
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(search_bp, url_prefix="/api")
     app.register_blueprint(drivers_bp, url_prefix="/api")
     app.register_blueprint(bookings_bp, url_prefix="/api")
     app.register_blueprint(payments_bp, url_prefix="/api")
     app.register_blueprint(ratings_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api")
-    app.register_blueprint(tickets_bp, url_prefix="/api")
 
     register_error_handlers(app)
     register_jwt_errors(jwt)

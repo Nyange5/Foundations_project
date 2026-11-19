@@ -1,3 +1,9 @@
+"""SMS through Africa's Talking (https://developers.africastalking.com).
+
+Sending an SMS must never break a booking: every failure is logged and
+swallowed. When SMS is not configured, messages are logged and skipped.
+"""
+
 import json
 import logging
 import urllib.error
@@ -12,6 +18,8 @@ LIVE_URL = "https://api.africastalking.com/version1/messaging"
 SANDBOX_URL = "https://api.sandbox.africastalking.com/version1/messaging"
 
 
+# Sends an SMS to a phone number using the Africa's Talking messaging API.
+# It checks the API configuration, sends the message, and handles failures without interrupting the booking process.
 def send(phone, message):
     """Send one SMS. Returns True if Africa's Talking accepted it."""
     cfg = current_app.config
@@ -41,11 +49,13 @@ def send(phone, message):
         if not ok:
             log.warning("SMS to %s not accepted: %s", _mask(phone), body)
         return ok
-    except Exception as err:  # an SMS problem must never break a booking
+    except Exception as err:  # noqa: BLE001 - an SMS problem must never break a booking
         log.warning("SMS to %s failed: %s", _mask(phone), err)
         return False
 
 
+# Extracts the trip details associated with a booking, including its route, departure time, and number of seats.
+# Returns these details together so they can be reused when creating SMS notifications.
 def _describe(booking):
     target = booking.trip or booking.offer
     when = target.departure_time.strftime("%a %d %b %H:%M")
@@ -54,6 +64,8 @@ def _describe(booking):
     return route, when, seats
 
 
+# Sends booking confirmation messages to the passenger and, when applicable, the driver.
+# The messages include the booking details and payment information based on the type of ride.
 def booking_confirmed(booking):
     """Tell the passenger (and the driver, for a ride) about a confirmed booking."""
     route, when, seats = _describe(booking)
@@ -75,6 +87,8 @@ def booking_confirmed(booking):
         )
 
 
+# Sends cancellation notifications to the passenger and, when applicable, the driver.
+# It also informs the passenger about a pending refund and lets the driver know that the seats are available again.
 def booking_cancelled(booking):
     """Tell the passenger (and the driver, for a ride) about a cancellation."""
     route, when, seats = _describe(booking)
@@ -94,6 +108,8 @@ def booking_cancelled(booking):
         )
 
 
+# Hides most of a phone number before it is included in application logs.
+# It keeps only the last three digits visible to help identify the recipient while protecting their privacy.
 def _mask(phone):
     # Keep phone numbers out of logs, apart from the last digits.
     return f"***{str(phone)[-3:]}"

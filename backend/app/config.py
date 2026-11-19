@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from typing import ClassVar
 
 
 class BaseConfig:
@@ -31,7 +32,7 @@ class BaseConfig:
     # Other sites allowed to call the API from a browser, comma separated.
     # Empty (the default) allows none: our own pages are served from the same
     # domain through Nginx and need no CORS.
-    CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+    CORS_ORIGINS: ClassVar[list[str]] = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
     # MTN MoMo Collections API. Sandbox: https://momodeveloper.mtn.com
     MOMO_BASE_URL = os.environ.get("MOMO_BASE_URL") or "https://sandbox.momodeveloper.mtn.com"

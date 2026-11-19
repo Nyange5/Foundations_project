@@ -1,3 +1,19 @@
+"""
+Paying for a booking with MTN MoMo (Collections API, "request to pay").
+
+1. start(): the passenger asks to pay their pending booking. We save a
+   pending payment with a new UUID reference and send MoMo a request to
+   pay. The amount always comes from the booking, never from the client.
+2. MoMo asks the passenger to approve on their phone with their MoMo PIN.
+3. check() asks MoMo how it went. It runs when the payment page polls, and
+   when MoMo calls our callback. We never trust what a callback says: it
+   only tells us which payment to check, and the answer comes from MoMo.
+4. Before confirming we compare the amount, currency and booking ID
+   (externalId) in MoMo's answer with ours.
+5. settle() applies the answer once. Calling it again changes nothing, so
+   a callback that arrives twice is harmless.
+"""
+
 import logging
 import uuid
 
@@ -12,11 +28,15 @@ from . import booking_service, momo_client, sms_service
 log = logging.getLogger(__name__)
 
 
+# Returns the MTN MoMo client used to communicate with the payment provider.
+# Keeping this separate also allows tests to replace it with a fake client.
 def get_payment_client():
     """Separate function so tests can swap in a fake client."""
     return momo_client.get_client()
 
 
+# Checks whether the MoMo client is available before attempting a payment.
+# If it is unavailable, it raises an error and informs the user that payment cannot proceed.
 def _require_client():
     client = get_payment_client()
     if client is None:
@@ -29,6 +49,8 @@ def _require_client():
     return client
 
 
+# Returns the payment configuration needed by the frontend payment page.
+# It provides the configured currency and indicates whether the system uses the sandbox environment.
 def provider_info():
     """What the payment page needs to know about the MoMo set-up."""
     cfg = current_app.config
@@ -38,6 +60,8 @@ def provider_info():
     }
 
 
+# Starts the payment process for a user's pending booking after checking that the booking is valid.
+# It saves a pending payment, sends the request to MTN MoMo, and returns the payment record.
 def start(user, booking_id, phone):
     """Start paying for the user's pending booking. Returns the Payment."""
     client = _require_client()
@@ -93,6 +117,8 @@ def start(user, booking_id, phone):
     return payment
 
 
+# Checks the current status of a pending payment directly with MTN MoMo.
+# It processes the provider's response and passes the result to settle() for updating the database.
 def check(payment):
     """Ask MoMo about a pending payment and apply the answer."""
     if payment.status != "pending":
@@ -106,6 +132,8 @@ def check(payment):
     return settle(payment.payment_id, outcome, reason)
 
 
+# Examines MoMo's response and determines whether a payment succeeded, failed, or is still pending.
+# For successful payments, it also verifies that the amount, currency, and booking ID match our records.
 def _outcome(payment, answer, currency):
     """Turn MoMo's answer into ("success" | "failed" | "pending", reason)."""
     status = str(answer.get("status", "")).upper()
@@ -133,6 +161,8 @@ def _outcome(payment, answer, currency):
     return "pending", None
 
 
+# Updates the payment and its associated booking based on the final payment outcome.
+# It uses database locking and status checks to prevent the same payment from being processed more than once.
 def settle(payment_id, outcome, reason=None):
     """Record the outcome of a payment, exactly once."""
     if outcome not in ("success", "failed"):
@@ -165,6 +195,8 @@ def settle(payment_id, outcome, reason=None):
     return payment
 
 
+# Locates a payment associated with an MTN MoMo callback using the payment reference or booking ID.
+# It returns the matching payment record, or None if no matching payment is found.
 def find_for_callback(reference=None, external_id=None):
     """Find the payment a MoMo callback is about: by our reference if it is
     given, otherwise by the booking ID we sent as externalId."""
