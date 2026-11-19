@@ -1,8 +1,14 @@
-// Log in with phone number and password.
+// Log in with phone number and password. Where the server allows it
+// (DEMO_LOGIN, never on a public server), one click logs in as a test account.
 (function login() {
   const form = document.getElementById("login");
   const msg = document.getElementById("msg");
   const button = form.querySelector("button");
+
+  function done(data) {
+    auth.save(data);
+    location.href = auth.nextPage(auth.homeFor(data.user));
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -13,13 +19,21 @@
       return;
     }
     try {
-      const data = await ui.busy(button, "Logging in…", () =>
-        api.post("/auth/login", { phone: phone.value, password: password.value }),
-      );
-      auth.save(data);
-      location.href = auth.nextPage(auth.homeFor(data.user));
+      done(await ui.busy(button, "Logging in…", () =>
+        api.post("/auth/login", { phone: phone.value, password: password.value })));
     } catch (err) {
       ui.formError(form, msg, err);
     }
+  });
+
+  const demoMsg = document.getElementById("demo-msg");
+  document.querySelectorAll(".demo-buttons button").forEach((b) => {
+    b.addEventListener("click", async () => {
+      try {
+        done(await ui.busy(b, "Logging in…", () => api.post("/auth/demo", { role: b.dataset.role })));
+      } catch (err) {
+        ui.say(demoMsg, err.message);
+      }
+    });
   });
 })();

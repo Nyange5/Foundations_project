@@ -1,5 +1,22 @@
-from .booking import Booking
+from .booking import Booking, BookingSeat
+from .login_code import LoginCode
+from .payment import Payment
+from .rating import Rating
 from .transport import BusCompany, BusTrip, RideOffer, Route
-from .user import Driver, User, Vehicle
+from .user import Driver, User, Vehicle, VehiclePhoto
 
-__all__ = ["Booking", "BusCompany", "BusTrip", "Driver", "RideOffer", "Route", "User", "Vehicle"]
+__all__ = [
+    "Booking",
+    "BookingSeat",
+    "BusCompany",
+    "BusTrip",
+    "Driver",
+    "LoginCode",
+    "Payment",
+    "Rating",
+    "RideOffer",
+    "Route",
+    "User",
+    "Vehicle",
+    "VehiclePhoto",
+]

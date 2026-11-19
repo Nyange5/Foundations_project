@@ -49,7 +49,7 @@ def send(phone, message):
         if not ok:
             log.warning("SMS to %s not accepted: %s", _mask(phone), body)
         return ok
-    except Exception as err:  # an SMS problem must never break a booking
+    except Exception as err:  # noqa: BLE001 - an SMS problem must never break a booking
         log.warning("SMS to %s failed: %s", _mask(phone), err)
         return False
 

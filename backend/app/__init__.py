@@ -1,12 +1,10 @@
 import os
 
 from flask import Flask
-from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
-from .auth.decorators import register_jwt_errors
 from .config import CONFIGS
-from .errors import register_error_handlers
-from .extensions import db, migrate
+from .extensions import db, jwt, migrate
 
 
 def create_app(config_name=None):
@@ -17,19 +15,24 @@ def create_app(config_name=None):
     app.config.from_object(config)
 
     if config_name == "production":
-        missing = [k for k in ("DATABASE_URL", "SECRET_KEY") if not app.config.get(k)]
+        # Fail fast on the server instead of running half-configured.
+        required = ("DATABASE_URL", "SECRET_KEY", "JWT_SECRET_KEY")
+        missing = [k for k in required if not app.config.get(k)]
         if missing:
             raise RuntimeError(f"Missing environment variables: {', '.join(missing)}")
 
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
+    if app.config["CORS_ORIGINS"]:
+        # Only the listed sites; by default the API answers same-origin only.
+        CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
 
-    # JWTManager must be initialized before login/register routes create tokens.
-    jwt = JWTManager(app)
-    register_jwt_errors(jwt)
-    register_error_handlers(app)
-
+    from . import models  # noqa: F401  (registers the tables)
     from .auth import auth_bp
+    from .auth.decorators import register_jwt_errors
+    from .cli import register_commands
+    from .errors import register_error_handlers
     from .routes.admin import admin_bp
     from .routes.bookings import bookings_bp
     from .routes.drivers import drivers_bp
@@ -37,12 +40,20 @@ def create_app(config_name=None):
     from .routes.payments import payments_bp
     from .routes.ratings import ratings_bp
 
+    # TODO: main also registers search_bp (app/routes/search.py) and
+    # tickets_bp (app/routes/tickets.py), but those files were never
+    # committed to any branch. Add them back here once they are pushed.
+
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(admin_bp, url_prefix="/api")
-    app.register_blueprint(bookings_bp, url_prefix="/api")
     app.register_blueprint(drivers_bp, url_prefix="/api")
+    app.register_blueprint(bookings_bp, url_prefix="/api")
     app.register_blueprint(payments_bp, url_prefix="/api")
     app.register_blueprint(ratings_bp, url_prefix="/api")
+    app.register_blueprint(admin_bp, url_prefix="/api")
+
+    register_error_handlers(app)
+    register_jwt_errors(jwt)
+    register_commands(app)
 
     return app

@@ -1,3 +1,4 @@
+
 PLACES = (
     "Kigali",
     "Bugesera",
