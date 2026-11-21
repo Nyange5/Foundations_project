@@ -1,3 +1,9 @@
+"""SMS through Africa's Talking (https://developers.africastalking.com).
+
+Sending an SMS must never break a booking: every failure is logged and
+swallowed. When SMS is not configured, messages are logged and skipped.
+"""
+
 import json
 import logging
 import urllib.error
@@ -41,7 +47,7 @@ def send(phone, message):
         if not ok:
             log.warning("SMS to %s not accepted: %s", _mask(phone), body)
         return ok
-    except Exception as err:  # an SMS problem must never break a booking
+    except Exception as err:  # noqa: BLE001 - an SMS problem must never break a booking
         log.warning("SMS to %s failed: %s", _mask(phone), err)
         return False
 
