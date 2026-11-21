@@ -1,5 +1,17 @@
+"""A ride from the driver's side, like a taxi app: the driver taps Start ride
+when they set off and End ride when they arrive. Once a ride has ended,
+its passengers pay with MTN MoMo (payment_service), and the driver sees
+each payment come in.
+
+With the driver's permission, their phone also records where the ride
+started and ended and, while it is on, where the car is about every half
+minute. The driver, the ride's passengers and admins can see that trip
+record on a map.
+"""
+
 import math
 from datetime import timedelta
+from itertools import pairwise
 
 from ..errors import bad_request, conflict, not_found
 from ..extensions import db
@@ -119,7 +131,7 @@ def trip_record(user, offer_id):
     points = (db.session.query(RideLocation).filter_by(offer_id=offer_id)
               .order_by(RideLocation.recorded_at, RideLocation.location_id).all())
     usable = [p for p in points if p.accuracy_m is None or p.accuracy_m <= 150]
-    km = sum(_km(a, b) for a, b in zip(usable, usable[1:], strict=False))  # pairs in a row
+    km = sum(_km(a, b) for a, b in pairwise(usable))  # each point and the next
     return {
         "ride": offer.to_dict(),
         "started_at": offer.started_at.isoformat() if offer.started_at else None,
