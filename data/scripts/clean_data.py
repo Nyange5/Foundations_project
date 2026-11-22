@@ -1,6 +1,7 @@
 """Clean the raw collected data and write CSVs to data/processed/."""
 
 import csv
+import os
 import re
 import sys
 from datetime import date, datetime
@@ -10,7 +11,8 @@ DATA = Path(__file__).resolve().parents[1]
 RAW = DATA / "raw"
 PROCESSED = DATA / "processed"
 
-# Sync place list with API. Run from repo root or api container.
+# Share the place list with the API. Run from the repo, or inside the api
+# container (where the backend is the working directory).
 _backend = DATA.parent / "backend"
 sys.path.insert(0, str(_backend if _backend.exists() else Path.cwd()))
 from app.places import ALIASES, PLACES, normalise_place  # noqa: E402
@@ -33,14 +35,25 @@ class RowError(ValueError):
     pass
 
 
+def bus_enabled():
+    # Same switch as the API (backend/app/config.py).
+    return os.environ.get("FEATURE_BUS_BOOKING", "").strip().lower() in ("1", "true", "yes", "on")
+
+
 def main():
     PROCESSED.mkdir(exist_ok=True)
     problems = []
 
     write_districts()
 
-    companies = clean_file("bus_companies.csv", COMPANY_COLUMNS, clean_company, problems)
-    trips = clean_file("bus_trips.csv", TRIP_COLUMNS, clean_trip, problems)
+    if bus_enabled():
+        companies = clean_file("bus_companies.csv", COMPANY_COLUMNS, clean_company, problems)
+        trips = clean_file("bus_trips.csv", TRIP_COLUMNS, clean_trip, problems)
+    else:
+        # Bus booking is a future phase; its collection and cleaning are paused.
+        print("Skipped bus_companies.csv and bus_trips.csv: bus booking is a future phase and "
+              "FEATURE_BUS_BOOKING is off.")
+        companies = trips = None
     routes = clean_file("routes.csv", ROUTE_COLUMNS, clean_route, problems)
 
     if companies is not None:
@@ -111,18 +124,9 @@ def clean_company(row):
         raise RowError("registration_number is empty")
     if not row["source"]:
         raise RowError("source is empty (say where this came from, see sources.md)")
-
-    # A bad phone must not throw away a good company: blank it and warn.
-    phone = ""
-    if row["contact_phone"]:
-        try:
-            phone = clean_phone(row["contact_phone"])
-        except RowError as err:
-            print(f"  Warning: {err}; phone left empty for {row['name']}")
-
     return {
         "name": " ".join(row["name"].split()),
-        "contact_phone": phone,
+        "contact_phone": clean_phone(row["contact_phone"]) if row["contact_phone"] else "",
         "registration_number": row["registration_number"].upper().replace(" ", ""),
         "licence_number": row["licence_number"].upper().replace(" ", ""),
         "source": row["source"],
@@ -234,4 +238,3 @@ def write_districts():
 
 if __name__ == "__main__":
     main()
-
