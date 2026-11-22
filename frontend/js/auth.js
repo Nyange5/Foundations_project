@@ -53,6 +53,7 @@ const auth = (() => {
   }
 
   function homeFor(u) {
+    if (u.role === "admin") return "/admin/drivers.html";
     return u.role === "driver" ? "/driver/offer.html" : "/search.html";
   }
 
@@ -67,6 +68,7 @@ const auth = (() => {
       a.textContent = text;
       if (cls) a.className = cls;
       box.append(a);
+      return a;
     };
     if (!u) {
       link("/login.html", "Log in");
@@ -77,7 +79,11 @@ const auth = (() => {
     name.className = "account-name";
     name.textContent = u.full_name.split(" ")[0];
     box.append(name);
-    if (u.role === "driver") link("/driver/offer.html", "Post a ride");
+    if (u.role === "admin") {
+      link("/admin/drivers.html", "Drivers");
+      link("/admin/companies.html", "Companies").dataset.feature = "bus";
+      link("/admin/refunds.html", "Refunds");
+    } else if (u.role === "driver") link("/driver/offer.html", "Post a ride");
     else link("/bookings.html", "My bookings");
     const out = document.createElement("button");
     out.type = "button";
