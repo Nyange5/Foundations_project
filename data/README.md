@@ -1,103 +1,99 @@
-# ETIKE data guide
+# Data
 
-**Status:** Sprint 1 draft, updated as the collection progresses
+ETIKE uses **only real, collected data**: routes between districts, departure times, fares and bus companies.
 
-This folder holds everything about the **real data** behind ETIKE: where it comes from, how we clean it, and how it reaches the database. 
+> **Bus data collection is paused.** Bus booking moved to a future phase (see the main README's Roadmap), because bus companies would first need an operator system. The bus formats below and the scripts' bus loaders are kept for that phase; while `FEATURE_BUS_BOOKING` is off, `clean_data.py` and `load_data.py` skip `bus_companies.csv` and `bus_trips.csv` with a message. Rides are posted by drivers on the website, so they need no collected data. There is no dummy, fake or sample data anywhere in this project, in code, tests, seeds or the frontend.
 
-```
-data/
-├── README.md     ← this file: rules and process
-├── sources.md    ← log of every source we collect from
-└── raw/          ← original files exactly as received (NOT committed to Git)
-```
+## How data gets here
 
-## 1. Rules
+1. The team collects data from real sources (company websites, printed timetables, interviews, observation at terminals).
+2. Every source is recorded in [`sources.md`](sources.md): what was collected, when, and by whom.
+3. Raw files go in `raw/`. They are kept as collected, never edited by hand.
+4. Raw data is cleaned: consistent district names, times in 24-hour format, fares in RWF as whole numbers, duplicates removed, and anything we could not confirm is marked as unconfirmed rather than guessed.
+5. `scripts/clean_data.py` does the cleaning and writes `processed/`. `scripts/load_data.py` loads `processed/` into the database. Both can be run again at any time (see the main README for the commands).
 
-1. **Real data only.** We do not use dummy or invented data. If a value is unknown, leave it empty; never guess it.
-2. **Every source is logged.** Nothing enters the database unless it has a row in `sources.md`.
-3. **Explain before you ask.** Tell every source why we need the data, how it is used and how it is protected, before collecting anything.
-4. **Consent first.** The source agrees (in writing or by message, noted in `sources.md`) and may withdraw at any time. Withdrawn data is deleted.
-5. **Collect the minimum.** Only the fields in section 3. Personal data (a driver's phone number, licence number, a person's name) is collected only when the person agrees and the feature needs it, in line with Rwanda's Law No. 058/2021 on personal data protection.
-6. **Raw files stay out of Git.** `data/raw/` is git-ignored, so personal details never reach the repository. Only `README.md`, `sources.md` and the cleaning/loading scripts are committed.
-7. **Cleaned data is reproducible.** Anyone can rebuild the database data by re-running the loading script on the raw files.
+## The CSV files
 
-## 2. Pipeline
+Put these in `raw/` as UTF-8 CSV with a header row. Every file is optional: the scripts skip a missing one and say so. A row that fails a check is listed and left out; it is never guessed or filled in.
 
-```
-Collect  →  Record in sources.md  →  Clean  →  Load by script  →  Verify
-```
+**`bus_companies.csv`**
 
-| Step | What happens | 
-| --- | --- | 
-| Collect | Visit, call or interview the source; photograph or copy the timetable/price list; save the original into `data/raw/` | 
-| Record | Add a row to `sources.md` the same day | 
-| Clean | Standardise names, times and prices (section 4) | 
-| Load | Run the loading script to fill `bus_companies`, `routes` and `bus_trips` | 
-| Verify | Spot-check 10% of rows against the original source; run the checklist in section 5 | 
+| Column | Example of the format | Required |
+|--------|-----------------------|----------|
+| `name` | as printed by the company | yes |
+| `contact_phone` | `078 123 4567` or `+250781234567` | no |
+| `registration_number` | the company's RDB registration number | yes, it identifies the company |
+| `licence_number` | RURA operating licence number | no |
+| `source` | where it came from, matching a row in `sources.md` | yes |
 
-## 3. What we collect
+**`bus_trips.csv`**: one row per departure on a date.
 
-### Bus companies → `bus_companies`
+| Column | Example of the format | Required |
+|--------|-----------------------|----------|
+| `company_registration_number` | must match `bus_companies.csv` (or a company already loaded) | yes |
+| `origin`, `destination` | district names; Nyarugenge, Gasabo, Kicukiro and Nyabugogo become Kigali, and old town names such as Butare (Huye) or Gisenyi (Rubavu) are converted | yes |
+| `departure_date` | `2026-12-01` | yes |
+| `departure_time` | `06:30`, `6h30` or `6:30 AM`, saved as 24-hour `HH:MM`, Rwanda time | yes |
+| `price_rwf` | whole francs: `3500`, `3,500` or `3500 RWF` | yes |
+| `total_seats` | seats on that bus | yes |
+| `source` | as above | yes |
 
-| Field | Example | 
-| --- | --- | 
-| `name` | (company name as it prints it) | 
-| `phone` | (public office number) | 
+**`routes.csv`** (optional): `origin`, `destination`, `source`. Routes are also taken from the trips, so this is only needed for routes that have no dated trips yet.
 
-### Routes → `routes`
+## Districts and routes (what the live site uses now)
 
-| Field | Example |     
-| --- | --- | 
-| `from_district` | Kigali | 
-| `to_district` | Musanze | 
+Rides need only two files, both in `processed/`. `clean_data.py` writes them; `load_data.py` reads them.
 
-### Bus trips → `bus_trips`
+**`processed/districts.csv`**: the place names passengers can choose. `clean_data.py` writes it from the API's own list (`backend/app/places.py`: Kigali plus the 27 other districts), so it never needs hand-editing. `load_data.py` checks that it matches the API's list and warns if not.
 
-| Field | Example | 
-| --- | --- | 
-| `company` | (must match a `name` above) | 
-| `route` | from + to district | Required |
-| `departs_at` | 07:00 | 
-| `seats_total` | 30 | 
-| `fare_rwf` | 3000 | 
+| Column | What it holds |
+|--------|---------------|
+| `name` | official name, e.g. `Huye` |
+| `also_written_as` | other spellings accepted in searches and raw files, separated by `; `, e.g. `Butare` |
 
-### Private and shared rides
+**`processed/routes.csv`**: one row per direction travelled (Kigali to Huye and Huye to Kigali are two rows). Made by `clean_data.py` from `raw/routes.csv` (same columns).
 
-Prices for private cars and drivers' interest in shared seats are collected through short interviews with drivers. Record only what the driver agrees to share. Vehicle and driver details are stored only after the driver consents, and drivers are approved through the app later, not from this folder.
+| Column | What it holds | Required |
+|--------|---------------|----------|
+| `origin` | a `name` from `districts.csv` | yes |
+| `destination` | a different `name` from `districts.csv` | yes |
+| `source` | where we learned this route is travelled, matching a row in `sources.md` | yes |
 
+`load_data.py` adds routes that are not in the database yet and skips (with a message) any row whose places are not two different known districts. Drivers can also create a route by posting a ride on it.
 
-## 4. Cleaning rules
+## Real drivers
 
-- **Districts:** use the official English spelling, capitalised (Kigali, Musanze, Huye, Rubavu, ...). One spelling per district everywhere.
-- **Times:** 24-hour `HH:MM`.
-- **Prices:** whole numbers in RWF, no `RWF`, commas or spaces (`3000`, not `3,000 RWF`).
-- **Company names:** exactly as the company writes them; remove duplicates (same company, different spelling).
-- **Missing values:** leave empty. Do not write `N/A`, `0` or a guess.
-- **Dates:** record the date the data was collected, since fares and timetables change.
-- **Phone numbers:** digits only, local format (`078xxxxxxx`).
+Drivers normally sign up on the website. To add drivers the team has met (with their consent), use `scripts/add_drivers.py` with a CSV kept in `raw/` (ignored by Git) or answer its prompts:
 
-## 5. Verification checklist
+| Column | Example of the format |
+|--------|-----------------------|
+| `full_name` | as on their licence |
+| `phone` | `078 123 4567` |
+| `license_number` | driving licence number |
+| `plate_number` | `RAD 123 B` |
+| `model` | `Toyota RAV4` |
+| `seats` | passenger seats, driver not counted (1 to 30) |
+| `national_id_number` | 16 digits, as on their ID |
+| `date_of_birth` | `1988-04-21` (18 or older) |
+| `gender` | `female` or `male` |
+| `home_district`, `home_sector` | where they live, e.g. `Musanze`, `Muhoza` |
 
-Before a cleaned file is handed over for loading:
-
-- [ ] Every row has a matching entry in `sources.md`
-- [ ] No row contains personal data the person did not agree to share
-- [ ] District names, times and prices follow section 4
-- [ ] No duplicate company, route or trip
-- [ ] About 10% of rows re-checked against the original source
-- [ ] Original file saved in `data/raw/` (not committed)
-
-## 6. Keeping `raw/` out of Git
-
-Add this to the root `.gitignore`. The `.gitkeep` exception keeps the folder in the repository:
-
-```
-data/raw/*
-!data/raw/.gitkeep
+```bash
+docker compose exec api python /data/scripts/add_drivers.py /data/raw/drivers.csv
 ```
 
-## 7. If a source asks us to remove their data
+Each driver starts **not approved**. They log in with the temporary password, check their details and upload their six documents (national ID, driving licence, RURA authorisation, vehicle registration card, insurance, inspection certificate) on the driver page; an admin approves them once all are uploaded and checked. Documents are never put in this folder or in Git. The script prints a temporary password for each driver, once; give it to the driver privately. Rows that fail a check or are already registered are skipped with a message.
 
-1. Delete their files from `data/raw/`.
-2. Remove their rows from the cleaned files and from the database .
-3. Mark the entry in `sources.md` as **Withdrawn** (keep the row, remove the data).
+## Consent
+
+Before using anything a person told us (an interview, a driver's details), ask for their consent and record in `sources.md` whether it was given and when. The signed or recorded consent itself goes in `data/consent/`, which Git ignores: never commit it. Keep a copy somewhere the team controls (for example a shared drive with restricted access).
+
+## Bus files (future phase)
+
+`clean_data.py` writes the same columns to `processed/`, plus `districts.csv`, the list of official place names and the other spellings it accepts. Duplicates (same company, route, date and time) are removed.
+
+`load_data.py` matches what is already in the database: companies by registration number, routes by origin and destination, trips by company, route and departure time. Running it twice adds nothing new. For a trip that is already loaded it only updates the fare, so seats already booked are kept.
+
+## Personal data never goes in this repository
+
+Do not commit names, phone numbers, ID numbers or photos of people, including from interviews. Summarise what you learned instead. The `.gitignore` excludes `raw/*` by default; only add a raw file to Git (with `git add -f`) after checking it contains no personal details, and record it in `sources.md`.
