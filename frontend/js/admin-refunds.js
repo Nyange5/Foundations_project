@@ -1,53 +1,45 @@
-// Admin: refunds owed to passengers who cancelled a paid bus ticket.
-(async function adminRefunds() {
+// Admin: verify bus companies so their trips appear in search.
+(async function adminCompanies() {
   if (!auth.require("admin")) return;
   const list = document.getElementById("results");
   const loading = document.getElementById("loading");
   const msg = document.getElementById("msg");
-  const status = new URLSearchParams(location.search).get("status") === "refunded" ? "refunded" : "due";
-
-  const tabs = document.getElementById("tabs");
-  [["due", "To send"], ["refunded", "Sent"]].forEach(([value, label]) => {
-    const a = ui.el("a", "mode");
-    a.href = `?status=${value}`;
-    if (value === status) a.setAttribute("aria-current", "page");
-    a.append(ui.el("span", null, label));
-    tabs.append(a);
-  });
 
   try {
-    const { refunds } = await api.get(`/admin/refunds?status=${status}`);
+    const { companies } = await api.get("/admin/companies");
     loading.hidden = true;
-    if (!refunds.length) {
-      list.replaceWith(ui.empty("Nothing here",
-        status === "due" ? "No refunds are waiting to be sent." : "No refunds have been sent yet."));
+    if (!companies.length) {
+      list.replaceWith(ui.empty("No bus companies yet",
+        "Companies appear here once their collected data is loaded with data/scripts/load_data.py."));
       return;
     }
-    list.append(...refunds.map(card));
+    list.append(...companies.map(card));
   } catch (err) {
     loading.hidden = true;
     ui.say(msg, err.message);
   }
 
-  function card(r) {
+  function card(c) {
     const li = ui.el("li", "result");
     li.append(
-      ui.el("span", "result-time", `${ui.money(r.amount)} to ${r.passenger_name}`),
-      ui.el("span", "result-price", r.passenger_phone),
-      ui.el("span", "result-meta", `Booking #${r.booking_id} · ${r.trip} · ${ui.when(r.departure_time)} · ${r.operator}`),
-      ui.el("span", "result-note", r.refunded_at ? `Sent ${ui.day(r.refunded_at)}` : ""),
+      ui.el("span", "result-time", c.name),
+      ui.el("span", "result-price", c.registration_number),
+      ui.el("span", "result-meta", c.contact_phone || "No phone recorded"),
+      ui.el("span", "result-note", c.licence_number ? `Licence ${c.licence_number}` : "No licence recorded"),
     );
     const actions = ui.el("div", "result-actions");
-    actions.append(ui.el("span", `status status-${r.refund_status === "due" ? "pending" : "approved"}`,
-      r.refund_status === "due" ? "To send" : "Sent"));
-    if (r.refund_status === "due") {
-      const b = ui.el("button", "btn-black btn-sm", "Mark as sent");
+    actions.append(ui.el("span", `status status-${c.is_verified ? "approved" : "pending"}`,
+      c.is_verified ? "Verified" : "Not verified"));
+    if (!c.is_verified) {
+      const b = ui.el("button", "btn-black btn-sm", "Verify");
       b.type = "button";
       b.addEventListener("click", async () => {
         try {
-          await ui.busy(b, "Saving…", () => api.post(`/admin/refunds/${r.payment_id}/done`));
-          li.remove();
-          ui.say(msg, `Refund of ${ui.money(r.amount)} to ${r.passenger_name} marked as sent.`, "info");
+          const { company } = await ui.busy(b, "Saving…", () =>
+            api.post(`/admin/companies/${c.company_id}/verify`),
+          );
+          li.replaceWith(card(company));
+          ui.say(msg, `${company.name} is verified. Its trips now show in search.`, "info");
         } catch (err) {
           ui.say(msg, err.message);
         }

@@ -2,24 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Create an account – ETIKE</title>
   <meta name="theme-color" content="#000000">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <a class="brand" href="index.html">ETIKE</a>
+      <a class="brand" href="/">ETIKE</a>
       <nav aria-label="Main">
         <ul class="topbar-links">
-          <li><a href="search.html">Find a trip</a></li>
+          <li><a href="/">Find a trip</a></li>
         </ul>
       </nav>
       <div class="account" id="account"></div>
@@ -28,7 +32,8 @@
 
   <main id="main" class="page wrap page-narrow">
     <h1>Create an account</h1>
-    <p class="page-sub">Already have one? <a href="login.html">Log in</a></p>
+    <p class="page-sub">Already have one? <a href="/login.html" id="to-login">Log in</a></p>
+    <p class="trip-msg" id="why-login" data-tone="info" hidden></p>
 
     <form class="form" id="register" novalidate>
           <div class="modes" role="radiogroup" aria-label="Account type">
@@ -54,31 +59,60 @@
         <span>Email (optional)</span>
         <input type="email" name="email" autocomplete="email">
       </label>
-      <label class="field" id="licence-field" hidden>
-        <span>Driving licence number</span>
-        <input type="text" name="license_number" autocomplete="off">
-      </label>
-      <p class="field-hint" id="licence-hint" hidden>We check your licence before you can post rides.</p>
       <label class="field">
         <span>Password</span>
         <input type="password" name="password" autocomplete="new-password" minlength="8" required>
       </label>
       <p class="field-hint">At least 8 characters.</p>
+      <p class="field-hint" id="driver-hint" hidden>After you create your account, you fill in your details (national ID, driving licence) and upload your documents on your driver page. We check them, then approve you to post rides.</p>
       <button class="btn-black" type="submit">Create account</button>
       <p class="trip-msg" id="msg" role="alert"></p>
     </form>
   </main>
 
   <footer class="footer">
-    <div class="wrap footer-inner">
-      <p class="brand">ETIKE</p>
-      <p>Intercity Travel Platform. Team 3, BSc Software Engineering, African Leadership University, Kigali.</p>
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a class="brand" href="/">ETIKE</a>
+          <p>Private cars and shared seats between Rwanda's districts.</p>
+        </div>
+        <nav class="footer-cols" aria-label="Footer">
+          <div>
+            <h2>Travel</h2>
+            <ul>
+              <li data-feature="bus"><a href="/search.html?type=bus">Bus tickets</a></li>
+              <li><a href="/search.html?type=private">Private car</a></li>
+              <li><a href="/search.html?type=shared">Shared seat</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2>Drive</h2>
+            <ul>
+              <li><a href="/register.html?role=driver">Become a driver</a></li>
+              <li><a href="/driver/offer.html">Post a ride</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2>Account</h2>
+            <ul>
+              <li><a href="/login.html">Log in</a></li>
+              <li><a href="/register.html">Sign up</a></li>
+              <li><a href="/bookings.html">My bookings</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 ETIKE</p>
+        <p>Kigali, Rwanda</p>
+      </div>
     </div>
   </footer>
 
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/register.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/register.js"></script>
 </body>
 </html>

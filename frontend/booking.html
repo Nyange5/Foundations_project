@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Confirm your booking – ETIKE</title>
   <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +23,7 @@
       <a class="brand" href="/">ETIKE</a>
       <nav aria-label="Main">
         <ul class="topbar-links">
-          <li><a href="/search.html">Find a trip</a></li>
+          <li><a href="/">Find a trip</a></li>
         </ul>
       </nav>
       <div class="account" id="account"></div>
@@ -33,26 +37,67 @@
     <p class="loading" id="loading">Loading…</p>
 
     <form class="form" id="book" hidden novalidate>
+      <!-- Rides: a full review (photos, driver, trip, price, how you pay). -->
+      <div class="review" id="review" hidden></div>
       <dl class="summary" id="summary"></dl>
-      <label class="field" id="seats-field">
+      <label class="field" id="seats-field" hidden>
         <span>Seats</span>
         <select name="seats"></select>
       </label>
-      <button class="btn-black" type="submit">Confirm booking</button>
+      <section class="seatmap-box" id="seatmap-box" hidden aria-labelledby="seatmap-title">
+        <h2 class="seatmap-title" id="seatmap-title">Choose your seats</h2>
+        <div class="seatmap-legend" aria-hidden="true">
+          <span><i class="seat-key"></i>Free</span>
+          <span><i class="seat-key is-chosen"></i>Yours</span>
+          <span><i class="seat-key is-taken"></i>Taken</span>
+        </div>
+        <div class="seatmap" id="seatmap" role="group" aria-label="Seat map"></div>
+        <p class="field-hint" id="seatmap-note"></p>
+      </section>
+      <p class="field-hint" id="pay-note"></p>
+      <button class="btn-black btn-confirm" type="submit">Confirm booking</button>
       <p class="trip-msg" id="msg" role="alert"></p>
     </form>
 
-    <section id="done" hidden aria-live="polite">
-      <dl class="summary" id="receipt"></dl>
-      <p class="page-sub">Payment by mobile money is coming soon. Your seats are held for you now.</p>
-      <p class="form-foot"><a href="/bookings.html">See all my bookings</a></p>
-    </section>
   </main>
 
   <footer class="footer">
-    <div class="wrap footer-inner">
-      <p class="brand">ETIKE</p>
-      <p>Intercity Travel Platform. Team 3, BSc Software Engineering, African Leadership University, Kigali.</p>
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a class="brand" href="/">ETIKE</a>
+          <p>Private cars and shared seats between Rwanda's districts.</p>
+        </div>
+        <nav class="footer-cols" aria-label="Footer">
+          <div>
+            <h2>Travel</h2>
+            <ul>
+              <li data-feature="bus"><a href="/search.html?type=bus">Bus tickets</a></li>
+              <li><a href="/search.html?type=private">Private car</a></li>
+              <li><a href="/search.html?type=shared">Shared seat</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2>Drive</h2>
+            <ul>
+              <li><a href="/register.html?role=driver">Become a driver</a></li>
+              <li><a href="/driver/offer.html">Post a ride</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2>Account</h2>
+            <ul>
+              <li><a href="/login.html">Log in</a></li>
+              <li><a href="/register.html">Sign up</a></li>
+              <li><a href="/bookings.html">My bookings</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 ETIKE</p>
+        <p>Kigali, Rwanda</p>
+      </div>
     </div>
   </footer>
 
