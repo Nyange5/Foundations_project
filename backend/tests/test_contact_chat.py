@@ -40,7 +40,7 @@ def test_phones_only_between_the_two_people_on_the_ride(client, ride, passenger)
 
 
 def test_contact_closes_a_day_after_the_ride(app, client, ride, passenger):
-    driver, offer_id = ride()
+    _driver, offer_id = ride()
     booking_id = book(client, passenger, offer_id)
     with app.app_context():
         offer = db.session.get(RideOffer, offer_id)
@@ -81,7 +81,7 @@ def test_chat_between_passenger_and_driver(client, ride, passenger):
 
 
 def test_only_the_two_people_can_read_the_chat(client, ride, passenger):
-    driver, offer_id = ride()
+    _driver, offer_id = ride()
     booking_id = book(client, passenger, offer_id)
     stranger = auth_header(register(client))
     other_driver, _ = ride()

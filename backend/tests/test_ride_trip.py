@@ -164,7 +164,7 @@ def test_location_rules(client, ride, passenger):
 
 
 def test_only_people_on_the_ride_see_where_it_went(client, ride, passenger):
-    driver, offer_id = ride()
+    _driver, offer_id = ride()
     book(client, passenger, offer_id)
     other_passenger = auth_header(register(client))
     other_driver, _ = ride()

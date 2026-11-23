@@ -269,7 +269,7 @@ def test_upload_and_delete_photo(client, driver_with_car):
 
 
 def test_only_real_images_are_accepted(client, driver_with_car):
-    headers, vehicle_id, folder = driver_with_car
+    headers, vehicle_id, _folder = driver_with_car
 
     script = upload(client, headers, vehicle_id, b"<script>alert(1)</script>", "car.jpg")
     svg = upload(client, headers, vehicle_id, b"<svg xmlns='http://www.w3.org/2000/svg'/>",
