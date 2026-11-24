@@ -8,6 +8,7 @@ All test data is created here or inside the tests. It is never committed as
 seed data, and it only ever lives in the test database.
 """
 
+import io
 from datetime import timedelta
 
 import pytest
@@ -66,10 +67,25 @@ def new_phone():
     return f"078{next(_phone_counter)}"
 
 
+# What a driver fills in on the driver page after signing up (besides a
+# unique ID and licence number, which details_for() adds).
+DRIVER_DETAILS = {"date_of_birth": "1990-05-14", "gender": "female",
+                  "home_district": "Huye", "home_sector": "Ngoma"}
+
+
+def details_for():
+    """A full set of driver details with a unique ID and licence number."""
+    return {**DRIVER_DETAILS, "national_id_number": new_national_id(),
+            "license_number": f"TEST{new_phone()}"}
+
+
+def new_national_id():
+    """A different 16-digit number each time."""
+    return f"119907{next(_phone_counter):010d}"
+
+
 def register(client, role="passenger", **extra):
     body = {"full_name": "Test User", "phone": new_phone(), "password": PASSWORD, "role": role}
-    if role == "driver":
-        body["license_number"] = f"TEST{new_phone()}"
     body.update(extra)
     return client.post("/api/auth/register", json=body)
 
@@ -84,8 +100,18 @@ def passenger(client):
 
 
 @pytest.fixture()
-def make_trip(app):
-    """make_trip(seats=2, price=5000, hours_ahead=24, verified=True) -> trip_id"""
+def bus(app):
+    """Switch bus booking on (it is a future phase, off by default).
+
+    Bus tests use this, so the bus code stays tested while it is hidden."""
+    app.config["FEATURE_BUS_BOOKING"] = True
+
+
+@pytest.fixture()
+def make_trip(app, bus):
+    """make_trip(seats=2, price=5000, hours_ahead=24, verified=True) -> trip_id
+
+    Creating a bus trip makes a bus test, so this switches bus booking on."""
 
     def make(seats=2, price=5000, hours_ahead=24, origin="Kigali", destination="Huye",
              verified=True):
@@ -139,43 +165,43 @@ def make_offer(app):
     return make
 
 
-class FakeFlutterwave:
-    """Stands in for Flutterwave in tests.
+class FakeMomo:
+    """Stands in for MTN MoMo in tests.
 
-    Set .transaction to what verify_by_reference should return: None while
-    the customer hasn't paid, or a dict like Flutterwave's `data`.
+    After a request to pay, MoMo says PENDING until the test calls
+    .answers("SUCCESSFUL") or .answers("FAILED", reason="APPROVAL_REJECTED").
     """
 
     def __init__(self):
-        self.charges = []
-        self.transaction = None
-        self.fail_charges = False
+        self.requests = []
+        self.answer = {"status": "PENDING"}
+        self.fail_requests = False
+        self.status_checks = 0
 
-    def charge_rwanda_mobile_money(self, tx_ref, amount, phone, email, fullname,
-                                   redirect_url=None):
-        from app.services.flutterwave_client import FlutterwaveError
+    def request_to_pay(self, reference, amount, phone, external_id, message):
+        from app.services.momo_client import MomoError
 
-        if self.fail_charges:
-            raise FlutterwaveError("Flutterwave could not be reached")
-        self.charges.append({"tx_ref": tx_ref, "amount": amount, "phone": phone,
-                             "email": email})
-        return f"https://checkout.example.test/{tx_ref}"
+        if self.fail_requests:
+            raise MomoError("MoMo could not be reached")
+        self.requests.append({"reference": reference, "amount": amount, "phone": phone,
+                              "external_id": external_id})
 
-    def verify_by_reference(self, tx_ref):
-        return self.transaction
+    def get_status(self, reference):
+        self.status_checks += 1
+        return self.answer
 
-    def pays(self, status="successful", **changes):
-        """Make the last charge come back with this status."""
-        charge = self.charges[-1]
-        self.transaction = {"tx_ref": charge["tx_ref"], "amount": charge["amount"],
-                            "currency": "RWF", "status": status, **changes}
+    def answers(self, status, **changes):
+        """Make MoMo report this status for the last request to pay."""
+        last = self.requests[-1]
+        self.answer = {"status": status, "amount": str(last["amount"]), "currency": "EUR",
+                       "externalId": str(last["external_id"]), **changes}
 
 
 @pytest.fixture()
-def flutterwave(monkeypatch):
+def momo(monkeypatch):
     from app.services import payment_service
 
-    fake = FakeFlutterwave()
+    fake = FakeMomo()
     monkeypatch.setattr(payment_service, "get_payment_client", lambda: fake)
     return fake
 
@@ -199,3 +225,84 @@ def make_admin(app, client):
 def _route(origin, destination):
     route = db.session.query(Route).filter_by(origin=origin, destination=destination).first()
     return route or Route(origin=origin, destination=destination)
+
+
+# The smallest file each check accepts: a PDF is recognised by "%PDF-".
+PDF = b"%PDF-1.4\n%test document\n"
+
+
+@pytest.fixture
+def documents(app, client, tmp_path):
+    """documents(headers, skip=()) does everything a driver needs for approval:
+    fills in their details, then uploads every legal document (except the
+    types in skip), each valid for a year."""
+    app.config["DOCUMENT_DIR"] = str(tmp_path / "documents")
+    from app import driver_documents
+
+    expires = (local_now() + timedelta(days=365)).date().isoformat()
+
+    def upload_all(headers, skip=()):
+        filled = client.put("/api/drivers/details", json=details_for(), headers=headers)
+        assert filled.status_code == 200, filled.get_json()
+        for doc_type in driver_documents.TYPES:
+            if doc_type in skip:
+                continue
+            response = client.post(
+                f"/api/drivers/documents/{doc_type}",
+                data={"document": (io.BytesIO(PDF), "doc.pdf"), "expires_on": expires},
+                headers=headers, content_type="multipart/form-data",
+            )
+            assert response.status_code == 201, response.get_json()
+
+    return upload_all
+
+
+# What a driver fills in when registering a car (plate and seats vary).
+CAR = {"model": "Toyota RAV4", "colour": "Blue", "year": 2019, "has_ac": True,
+       "luggage": "medium"}
+# The smallest file the photo check accepts as a JPEG.
+JPEG = b"\xff\xd8\xff\xe0" + b"0" * 32
+
+
+@pytest.fixture()
+def add_car(app, client, tmp_path):
+    """add_car(headers, plate, seats=4, photo=True) -> the vehicle, registered
+    with every detail and (by default) a photo, so its rides can be posted."""
+    app.config["UPLOAD_DIR"] = str(tmp_path / "uploads")
+
+    def add(headers, plate, seats=4, photo=True):
+        response = client.post("/api/drivers/vehicles", headers=headers,
+                               json={**CAR, "plate_number": plate, "seats": seats})
+        assert response.status_code == 201, response.get_json()
+        vehicle = response.get_json()["vehicle"]
+        if photo:
+            client.post(f"/api/drivers/vehicles/{vehicle['vehicle_id']}/photos", headers=headers,
+                        data={"photo": (io.BytesIO(JPEG), "car.jpg")},
+                        content_type="multipart/form-data")
+        return vehicle
+
+    return add
+
+
+@pytest.fixture()
+def ride(app, client, add_car):
+    """ride(minutes_ahead=30, seats=3) -> (driver headers, offer_id), posted by an
+    approved driver through the API."""
+
+    def make(minutes_ahead=30, seats=3, price=4000):
+        signup = register(client, role="driver")
+        headers = auth_header(signup)
+        with app.app_context():
+            driver = db.session.get(Driver, signup.get_json()["user"]["driver"]["driver_id"])
+            driver.is_approved = True
+            db.session.commit()
+        vehicle = add_car(headers, f"RA{signup.get_json()['user']['phone'][-5:]}", seats)
+        departure = (local_now() + timedelta(minutes=minutes_ahead)).replace(microsecond=0)
+        posted = client.post("/api/rides", headers=headers, json={
+            "vehicle_id": vehicle["vehicle_id"], "origin": "Kigali", "destination": "Huye",
+            "ride_type": "shared", "departure_time": departure.isoformat(), "price": price,
+            "seats_available": seats, "pickup_point": "Nyabugogo bus park, gate 2"})
+        assert posted.status_code == 201, posted.get_json()
+        return headers, posted.get_json()["ride"]["offer_id"]
+
+    return make

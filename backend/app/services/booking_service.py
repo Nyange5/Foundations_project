@@ -1,3 +1,25 @@
+"""Booking and cancelling seats without ever selling the same seat twice.
+
+Each booking runs in one database transaction. The bus trip or ride offer
+row is locked with SELECT ... FOR UPDATE before its seats are checked, so
+when two people book the last seat at the same moment, the second request
+waits for the first to finish and then sees that no seats are left.
+
+Bus tickets are paid before travel: a new bus booking is "pending" and
+holds its seats for BOOKING_HOLD_MINUTES while the passenger pays. Payment
+confirms it; a failed payment or an expired hold cancels it and gives the
+seats back.
+
+Shared and private rides are paid to the driver during or after the ride,
+so a ride booking is "confirmed" straight away.
+
+A confirmed booking can be cancelled until CANCEL_CUTOFF_HOURS before
+departure. Cancelling a paid bus ticket marks its payment as a refund due.
+
+Prices are always calculated here from the database, never taken from the
+client.
+"""
+
 import logging
 from datetime import timedelta
 

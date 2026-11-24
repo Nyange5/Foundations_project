@@ -1,3 +1,10 @@
+"""Refund status on payments
+
+Revision ID: c7b2f0a91d34
+Revises: a4c1e7d29b10
+Create Date: 2026-11-17 09:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

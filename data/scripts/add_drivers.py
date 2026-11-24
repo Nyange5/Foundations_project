@@ -1,5 +1,24 @@
-"""Creates unapproved driver accounts and vehicles from CSV or prompts, validating inputs, 
-   skipping duplicates, and generating unique one-time temporary passwords.
+"""Create real driver accounts, each with their car, from a CSV or prompts.
+
+    python data/scripts/add_drivers.py data/raw/drivers.csv   # from a CSV
+    python data/scripts/add_drivers.py                        # asks for one driver
+
+With Docker (the data folder is mounted at /data):
+
+    docker compose exec api python /data/scripts/add_drivers.py /data/raw/drivers.csv
+
+Only for drivers who agreed to be added: record their consent in
+data/sources.md first (the signed record itself stays outside Git).
+
+Every new driver starts NOT approved, exactly like signing up on the website.
+They log in and upload their legal documents on the driver page; an admin
+approves them once every document is uploaded and checked. Each driver gets
+a temporary password, printed once here: give it to the driver privately,
+never by group chat or email.
+
+A row that fails a check, or whose phone, licence or plate is already
+registered, is reported and skipped. Nothing is guessed or filled in.
+The CSV has personal details: keep it in data/raw/ (ignored by Git).
 """
 
 import csv

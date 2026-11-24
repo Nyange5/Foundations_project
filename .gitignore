@@ -19,3 +19,17 @@ venv/
 # Data: raw files may contain personal details, review before adding any
 data/raw/*
 !data/raw/.gitkeep
+
+# Local sample data tool: its fake accounts and rides are never committed
+# (real data only). The car photos it uses (backend/local_test_photos/,
+# free-licence photos with CREDITS.txt) are in Git, for demos.
+backend/local_test_data.py
+
+# Consent records for real data: kept outside the repository (see data/sources.md)
+data/consent/
+
+# Uploaded car photos, if a local folder is ever used instead of the Docker volume
+uploads/
+
+# The server's own copy of nginx/https.conf.example with its domain filled in
+nginx/https.conf

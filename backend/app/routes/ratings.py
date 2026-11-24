@@ -39,7 +39,6 @@ def rate_driver():
         db.session.rollback()
         raise conflict("You have already rated this ride.", "already_rated") from None
 
-    # Recalculate the driver's average from all their ratings.
     driver = booking.offer.driver
     average = (
         db.session.query(func.avg(Rating.score))
@@ -64,7 +63,9 @@ def driver_ratings(driver_id):
         .join(RideOffer, Booking.offer_id == RideOffer.offer_id)
         .filter(RideOffer.driver_id == driver_id)
     )
-    recent = query.order_by(Rating.created_at.desc()).limit(10).all()
+    # Written reviews first, newest first: they help people most.
+    recent = (query.order_by(Rating.comment.is_(None), Rating.created_at.desc())
+              .limit(20).all())
     return jsonify({
         "driver_id": driver_id,
         "driver_name": driver.user.full_name,

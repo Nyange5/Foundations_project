@@ -1,4 +1,22 @@
-"""Clean the raw collected data and write CSVs to data/processed/."""
+"""Clean the raw collected data and write CSVs to data/processed/.
+
+    python data/scripts/clean_data.py
+
+Reads (each one optional; a missing file is reported and skipped):
+    data/raw/bus_companies.csv
+    data/raw/bus_trips.csv
+    data/raw/routes.csv
+
+Writes:
+    data/processed/districts.csv      the official place names used
+    data/processed/bus_companies.csv
+    data/processed/routes.csv
+    data/processed/bus_trips.csv
+
+Rows that fail a check are listed and left out, never guessed or filled in.
+This script never invents data: with no raw files it writes no rows.
+See data/README.md for the columns.
+"""
 
 import csv
 import os

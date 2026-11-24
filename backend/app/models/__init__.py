@@ -1,3 +1,6 @@
+"""Database models. Importing this package registers every table with
+SQLAlchemy, which Flask-Migrate needs to see them."""
+
 from .booking import Booking, BookingSeat
 from .login_code import LoginCode
 from .message import Message

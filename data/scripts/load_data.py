@@ -1,4 +1,14 @@
-"""Loads the cleaned CSVs from data/processed/ into the database.
+"""Load the cleaned CSVs from data/processed/ into the database.
+
+    python data/scripts/load_data.py
+
+Safe to run more than once: rows that are already in the database are
+matched and updated, never added twice. Run clean_data.py first. A missing
+file is reported and skipped; nothing is invented to fill the gap.
+
+Districts are a fixed list in the API (backend/app/places.py). This script
+checks data/processed/districts.csv against that list and refuses to load
+routes between places the API does not know.
 
 Uses DATABASE_URL like the API does. With Docker:
 

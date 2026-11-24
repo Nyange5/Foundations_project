@@ -1,3 +1,10 @@
+"""Drivers' legal documents, and why a driver was rejected
+
+Revision ID: b6f4d2a8c915
+Revises: e5a1c9f3b207
+Create Date: 2026-11-18 12:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

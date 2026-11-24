@@ -1,3 +1,10 @@
+"""Features that can be switched on and off with environment variables.
+
+Bus booking is a future phase (bus companies would need a whole operator
+system: fleets, schedules, ticket scanning). Its code, tables and data stay
+in place, switched off with FEATURE_BUS_BOOKING, so it can come back later.
+"""
+
 from flask import current_app
 
 from .errors import ApiError, bad_request

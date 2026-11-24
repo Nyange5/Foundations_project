@@ -1,3 +1,12 @@
+"""One JSON error format for the whole API:
+
+    {"error": {"code": "not_found", "message": "Booking not found."}}
+
+Validation errors also list the problem fields:
+
+    {"error": {"code": "invalid_input", "message": "...", "fields": {"phone": "..."}}}
+"""
+
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
 

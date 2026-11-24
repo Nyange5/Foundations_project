@@ -1,3 +1,10 @@
+"""Meeting point on rides, and chat messages between passenger and driver
+
+Revision ID: f2b6d8e1a374
+Revises: e9a4c2d7f131
+Create Date: 2026-11-21 21:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

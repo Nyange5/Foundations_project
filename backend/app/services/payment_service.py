@@ -1,3 +1,22 @@
+"""Paying for a booking with MTN MoMo (Collections API, "request to pay").
+
+Bus tickets are paid before travel (a pending booking). Rides are paid
+after the driver ends the ride (a confirmed booking whose ride has ended);
+a failed ride payment can be tried again.
+
+1. start(): the passenger asks to pay their booking. We save a
+   pending payment with a new UUID reference and send MoMo a request to
+   pay. The amount always comes from the booking, never from the client.
+2. MoMo asks the passenger to approve on their phone with their MoMo PIN.
+3. check() asks MoMo how it went. It runs when the payment page polls, and
+   when MoMo calls our callback. We never trust what a callback says: it
+   only tells us which payment to check, and the answer comes from MoMo.
+4. Before confirming we compare the amount, currency and booking ID
+   (externalId) in MoMo's answer with ours.
+5. settle() applies the answer once. Calling it again changes nothing, so
+   a callback that arrives twice is harmless.
+"""
+
 import logging
 import uuid
 

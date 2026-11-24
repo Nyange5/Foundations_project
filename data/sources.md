@@ -1,55 +1,10 @@
-# Sources log
+# Data sources
 
-Every source of real data is recorded here **the day we collect from it**. See `README.md` for the rules.
+Add one row for every source, before its data is used.
 
-**Last updated:** 2 November 2026
+For anything that came from a person (an interview, a driver's details), ask for their consent first. Fill in **Consent obtained** (`yes` or `no`) and **Consent date**. Data with `no` is not used. The consent records themselves (forms, recordings) stay outside the repository, in `data/consent/` (ignored by Git) or the team's restricted shared drive. Public sources need no consent: write `n/a`.
 
-## Status key
-
-| Status | Meaning |
-| --- | --- |
-| Not started | Identified, not yet contacted |
-| Contacted | We reached out and are waiting for a reply |
-| Agreed | Source agreed to share; data not yet received |
-| Collected | Data received and saved in `data/raw/` |
-| Cleaned | Data cleaned and ready to load |
-| Loaded | Data is in the database |
-| Declined | Source declined; do not contact again without a new reason |
-| Withdrawn | Source withdrew consent; data deleted |
-
-## Log
-
-Nothing has been collected yet. The sources below are ones we plan to approach. They are **not** confirmed, and no data from them is in the project.
-
-| ID | Source | Type | Data we want | How we collect | Consent | Date | Raw file | Status | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| S-001 | RITCO | Bus company | Routes, timetable, fares | Website, then office/staff visit | — | — | — | Not started | Public website exists; staff confirmation needed |
-| S-002 | Volcano Express | Bus company | Routes, timetable, fares | Visit at Nyabugogo | — | — | — | Not started | |
-| S-003 | Horizon | Bus company | Routes, timetable, fares | Visit at Nyabugogo | — | — | — | Not started | |
-| S-004 | Drivers at Nyabugogo | Private drivers | Typical private-car prices per route; interest in shared seats | Short interviews | — | — | — | Not started | No names stored unless the driver agrees |
-| S-005 | RURA transport statistics | Public report | Registered operators, general context | Download public PDF | Not needed (public) | — | — | Not started | Cite the report; do not copy private data |
-
-## How to add an entry
-
-Copy this block, fill it in, and add a row to the table above:
-
-```
-ID:            S-00X
-Source:        (company / person's role / document)
-Type:          Bus company | Driver | Public document | Observation
-Contact:       (role and how we reached them; no private numbers in this file)
-Collected by:  (team member)
-Date:          YYYY-MM-DD
-Consent:       Verbal | Written | Message | Not needed (public)
-Data received: (what we actually got)
-Raw file:      data/raw/<filename>
-Cleaning done: (what we changed)
-Status:        Collected
-Notes:         (hesitations, restrictions on use, follow-up date)
-```
-
-## Rules for this file
-
-- Do **not** write private phone numbers, personal names of drivers, or licence numbers here. Refer to a source by company or role.
-- Keep rows even when a source declines or withdraws; change the status instead of deleting the row.
-- If a source restricts how we use their data, write the restriction in **Notes**.
+| Source | Type (website / timetable / interview / observation) | What was collected | Date collected | Collected by | Consent obtained | Consent date |
+|--------|------------------------------------------------------|--------------------|----------------|--------------|------------------|--------------|
+| geoBoundaries, RWA ADM2 (Open Data Rwanda 2012), CC BY 4.0 | website | District boundaries for the landing-page map (`frontend/assets/rwanda-districts.geojson`, simplified) | 2026-11-02 | Team 3 | n/a | n/a |
+| OpenStreetMap via the OSRM demo router, ODbL | website | Road routes, distances and driving times, fetched live in the browser (not stored) | 2026-11-02 | Team 3 | n/a | n/a |

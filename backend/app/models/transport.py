@@ -1,3 +1,9 @@
+"""Bus companies, routes, bus trips and ride offers from drivers.
+
+Departure times are stored as Rwanda local time (UTC+2 all year, no
+daylight saving), which is how timetables are written.
+"""
+
 from ..extensions import db
 from .user import utcnow
 

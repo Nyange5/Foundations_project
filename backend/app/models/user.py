@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from ..extensions import db
 
@@ -6,7 +6,7 @@ ROLES = ("passenger", "driver", "admin")
 
 
 def utcnow():
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 class User(db.Model):

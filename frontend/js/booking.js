@@ -153,7 +153,6 @@
       box.append(gallery);
     }
 
-    // Driver and car.
     const driver = ui.el("div", "review-card review-driver");
     const initials = item.driver_name.split(" ").map((w) => w[0]).slice(0, 2).join("");
     const who = ui.el("div");
@@ -180,7 +179,6 @@
       // Reviews are a help, not a must: book without them.
     }
 
-    // The trip.
     const trip = ui.el("div", "review-card review-trip");
     const stops = ui.el("ol", "review-stops");
     stops.append(ui.el("li", "is-from", item.origin), ui.el("li", "is-to", item.destination));

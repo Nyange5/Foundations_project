@@ -1,3 +1,10 @@
+"""Payments use MTN MoMo instead of Flutterwave
+
+Revision ID: a4c1e7d29b10
+Revises: 862d0004272b
+Create Date: 2026-11-16 10:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 
