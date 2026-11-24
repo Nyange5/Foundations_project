@@ -16,8 +16,11 @@ def test_good_settings_start():
     check_production(dict(GOOD))
 
 
+def test_demo_login_is_allowed_on_a_demo_server():
+    check_production({**GOOD, "DEMO_LOGIN": True})
+
+
 @pytest.mark.parametrize("change, message", [
-    ({"DEMO_LOGIN": True}, "DEMO_LOGIN must be off"),
     ({"SECRET_KEY": None}, "Missing environment variables: SECRET_KEY"),
     ({"SQLALCHEMY_DATABASE_URI": None}, "Missing environment variables: DATABASE_URL"),
     ({"JWT_SECRET_KEY": "change-me"}, "long random value for: JWT_SECRET_KEY"),

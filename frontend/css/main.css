@@ -1992,7 +1992,7 @@ html:not(.has-bus) [data-feature="bus"],
 html:not(.has-demo) [data-feature="demo"] {
   display: none !important;
 }
-/* Each role sees only its own links (auth.js sets data-role on <html>). */
+/* Hide links meant for other roles. */
 html[data-role="visitor"] [data-for]:not([data-for~="visitor"]),
 html[data-role="passenger"] [data-for]:not([data-for~="passenger"]),
 html[data-role="driver"] [data-for]:not([data-for~="driver"]),

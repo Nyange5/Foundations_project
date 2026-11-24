@@ -27,8 +27,7 @@ const auth = (() => {
   const token = () => load()?.token || null;
   const user = () => load()?.user || null;
 
-  // Links marked data-for="visitor passenger" (etc.) show only to those
-  // roles; main.css hides the rest.
+  // Used by main.css to hide other roles' links.
   document.documentElement.dataset.role = user()?.role || "visitor";
 
   function save(response) {
@@ -105,7 +104,7 @@ const auth = (() => {
     if (u.role === "admin") {
       link("/admin/drivers.html", "Drivers");
       link("/admin/companies.html", "Companies").dataset.feature = "bus";
-      // Refunds are only for cancelled bus tickets: rides are paid after they end.
+      // Refunds only come from bus tickets.
       link("/admin/refunds.html", "Refunds").dataset.feature = "bus";
     } else if (u.role === "driver") link("/driver/offer.html", "Post a ride");
     else link("/bookings.html", "My bookings");
