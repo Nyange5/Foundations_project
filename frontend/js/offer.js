@@ -316,6 +316,19 @@
     }
   });
 
+  // Where the driver is now, so the server can check they can reach the
+  // start in time. Null if they don't share it.
+  function here() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        () => resolve(null),
+        { timeout: 8000, maximumAge: 5 * 60 * 1000 },
+      );
+    });
+  }
+
   rideForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     ui.clearErrors(rideForm);
@@ -332,8 +345,8 @@
       body.seats_available = Number(f.seats_available.value);
     }
     try {
-      const { ride } = await ui.busy(rideForm.querySelector("button"), "Posting…", () =>
-        api.post("/rides", body),
+      const { ride } = await ui.busy(rideForm.querySelector("button"), "Posting…", async () =>
+        api.post("/rides", { ...body, current_location: await here() }),
       );
       ui.say(
         rideMsg,

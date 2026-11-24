@@ -343,6 +343,11 @@ def post_ride():
     )
     # Where passengers meet the driver, so nobody is left wondering.
     pickup = v.text(data, "pickup_point", min_len=5, max_len=200)
+    try:
+        here = ride_service.location_from(data.get("current_location"))
+    except ApiError:
+        here = None  # a bad phone position never blocks posting
+    ride_service.check_schedule(driver, origin, destination, departure, here)
 
     offer = RideOffer(
         driver_id=driver.driver_id,
