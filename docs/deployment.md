@@ -62,7 +62,7 @@ nano .env
 In `.env`:
 
 - `FLASK_ENV=production`
-- `DEMO_LOGIN=false`, `FEATURE_BUS_BOOKING=false`, and leave `CORS_ORIGINS` empty: the pages and the API share one domain, so no other site needs access.
+- `DEMO_LOGIN=false` (`true` only on a demo or grading server, see step 10), `FEATURE_BUS_BOOKING=false`, and leave `CORS_ORIGINS` empty: the pages and the API share one domain, so no other site needs access.
 - Replace every `change-me`. Make `SECRET_KEY` and `JWT_SECRET_KEY` two **different** random values:
   `python3 -c "import secrets; print(secrets.token_hex(32))"`
 - Make `DATABASE_URL` match `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_DB`.
@@ -82,7 +82,7 @@ curl http://localhost/api/health                    # {"database": "ok", "status
 
 What production adds over local development:
 
-- Gunicorn (worker count from `GUNICORN_WORKERS`), never the Flask debug server. `FLASK_ENV=production` keeps debug off. The API refuses to start if `DATABASE_URL`, `SECRET_KEY` or `JWT_SECRET_KEY` is missing, if a secret is still `change-me` or shorter than 32 characters, if the two secrets are the same, or if `DEMO_LOGIN` is on. If `ps` shows the API restarting, `docker compose -f docker-compose.prod.yml logs api` says which.
+- Gunicorn (worker count from `GUNICORN_WORKERS`), never the Flask debug server. `FLASK_ENV=production` keeps debug off. The API refuses to start if `DATABASE_URL`, `SECRET_KEY` or `JWT_SECRET_KEY` is missing, if a secret is still `change-me` or shorter than 32 characters, or if the two secrets are the same. If `ps` shows the API restarting, `docker compose -f docker-compose.prod.yml logs api` says which.
 - `restart: unless-stopped` on every container, so they come back after a crash or reboot.
 - Health checks: the API checks `/api/health`, and Nginx only starts once the API is healthy.
 - The API runs as a normal user inside its container, not root.
@@ -248,7 +248,24 @@ docker compose -f docker-compose.prod.yml run --rm -v "$PWD/data:/data" api pyth
 
 Each driver logs in, fills in their details (national ID number, date of birth, gender, home, licence number) and uploads their six documents on the driver page (national ID, driving licence, RURA authorisation, vehicle registration card, insurance, inspection certificate). On the admin Drivers page, open each one and check it against the details the driver typed in and their car plate; **Approve** only unlocks when all six are uploaded and in date. Reject with a reason if something is wrong: the driver sees it and can upload a corrected document.
 
-The list of required documents is in `backend/app/driver_documents.py`. It follows RURA's rule that carrying paying passengers needs its authorisation, but confirm the exact list with RURA before going live. Never run `local_test_data.py` on the server: it is fake data for laptops only, and it is not in Git or in the server image.
+The list of required documents is in `backend/app/driver_documents.py`. It follows RURA's rule that carrying paying passengers needs its authorisation, but confirm the exact list with RURA before going live. `local_test_data.py` is fake data: it is not in Git or in the server image. Never load it on a server with real users.
+
+### Demo or grading server
+
+For a server only the team and the facilitator use, load the sample data and turn on the one-click demo logins, so nobody has to create accounts:
+
+```bash
+# On your laptop: copy the script to the server
+scp backend/local_test_data.py USER@YOUR_DOMAIN:~/
+# On the server
+docker compose -f docker-compose.prod.yml cp ~/local_test_data.py api:/app/local_test_data.py
+docker compose -f docker-compose.prod.yml cp backend/local_test_photos api:/app/local_test_photos
+docker compose -f docker-compose.prod.yml exec api python local_test_data.py load
+sed -i 's/^DEMO_LOGIN=.*/DEMO_LOGIN=true/' .env
+docker compose -f docker-compose.prod.yml up -d
+```
+
+The login page then shows **Demo traveller** and **Demo driver**. They open only those two `@etike.test` accounts, never an admin or a real account. The sample rides are dated from the day you load them: run `load` again before a demo to move them forward (copy the script in again after a deploy, which rebuilds the container). Afterwards set `DEMO_LOGIN=false` and run `python local_test_data.py clear`.
 
 Then, on a phone: sign up as a passenger, search a real route, book a ride, cancel it.
 
@@ -257,7 +274,7 @@ Then, on a phone: sign up as a passenger, search a real route, book a ride, canc
 - [ ] `.env` has `chmod 600`, real random secrets, and is not in Git.
 - [ ] MoMo stays on the sandbox (`MOMO_TARGET_ENVIRONMENT=sandbox`) until MTN approves the live account.
 - [ ] `CORS_ORIGINS` is empty unless another site must call the API.
-- [ ] `DEMO_LOGIN` is not `true` (it logs in to test accounts without a password).
+- [ ] `DEMO_LOGIN` is not `true` unless this is a demo or grading server (it logs in to test accounts without a password).
 - [ ] Only ports 22, 80 and 443 are open; SSH keys only, no root login.
 - [ ] HTTPS is on and SSL Labs gives an A.
 - [ ] The admin password is long and stored in a password manager; `ADMIN_*` values are removed from `.env` after `create-admin`.

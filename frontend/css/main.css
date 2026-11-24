@@ -1992,6 +1992,14 @@ html:not(.has-bus) [data-feature="bus"],
 html:not(.has-demo) [data-feature="demo"] {
   display: none !important;
 }
+/* Hide links meant for other roles. */
+html[data-role="visitor"] [data-for]:not([data-for~="visitor"]),
+html[data-role="passenger"] [data-for]:not([data-for~="passenger"]),
+html[data-role="driver"] [data-for]:not([data-for~="driver"]),
+html[data-role="admin"] [data-for]:not([data-for~="admin"]) {
+  display: none !important;
+}
+
 .demo-login {
   margin-top: 2.5rem;
   padding: 1.25rem;

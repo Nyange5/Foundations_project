@@ -27,6 +27,9 @@ const auth = (() => {
   const token = () => load()?.token || null;
   const user = () => load()?.user || null;
 
+  // Used by main.css to hide other roles' links.
+  document.documentElement.dataset.role = user()?.role || "visitor";
+
   function save(response) {
     store({ token: response.access_token, user: response.user });
   }
@@ -78,6 +81,7 @@ const auth = (() => {
     const box = document.getElementById("account");
     if (!box) return;
     const u = user();
+    document.documentElement.dataset.role = u?.role || "visitor";
     box.replaceChildren();
     const link = (href, text, cls) => {
       const a = document.createElement("a");
@@ -92,6 +96,7 @@ const auth = (() => {
       link("/register.html", "Sign up", "account-cta");
       return;
     }
+    document.querySelector(".brand").href = homeFor(u);
     const name = document.createElement("span");
     name.className = "account-name";
     name.textContent = u.full_name.split(" ")[0];
@@ -99,7 +104,8 @@ const auth = (() => {
     if (u.role === "admin") {
       link("/admin/drivers.html", "Drivers");
       link("/admin/companies.html", "Companies").dataset.feature = "bus";
-      link("/admin/refunds.html", "Refunds");
+      // Refunds only come from bus tickets.
+      link("/admin/refunds.html", "Refunds").dataset.feature = "bus";
     } else if (u.role === "driver") link("/driver/offer.html", "Post a ride");
     else link("/bookings.html", "My bookings");
     const out = document.createElement("button");
@@ -126,8 +132,8 @@ const auth = (() => {
     const u = user();
     if (!u) return; // visitors: Log in / Sign up stay in the top bar
     let tabs;
-    if (u.role === "admin") tabs = [["/admin/drivers.html", "Drivers", "drivers"], ["/admin/refunds.html", "Refunds", "refunds"]];
-    else if (u.role === "driver") tabs = [["/", "Search", "search"], ["/driver/offer.html", "My trips", "trips"]];
+    if (u.role === "admin") tabs = [["/admin/drivers.html", "Drivers", "drivers"], ["/admin/refunds.html", "Refunds", "refunds", "bus"]];
+    else if (u.role === "driver") tabs = [["/driver/offer.html", "My trips", "trips"]];
     else tabs = [["/", "Search", "search"], ["/bookings.html", "Bookings", "bookings"]];
     const nav = document.createElement("nav");
     nav.className = "tabbar";
@@ -139,9 +145,10 @@ const auth = (() => {
       nav.append(el);
       return el;
     };
-    tabs.forEach(([href, label, icon]) => {
+    tabs.forEach(([href, label, icon, feature]) => {
       const a = item("a", label, icon);
       a.href = href;
+      if (feature) a.dataset.feature = feature;
       if (location.pathname === href || (href === "/" && location.pathname === "/index.html")) {
         a.setAttribute("aria-current", "page");
       }

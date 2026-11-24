@@ -40,7 +40,7 @@ No tables or data are removed; the booking service stays generic and still suppo
 | Module | Where | What it does |
 |--------|-------|--------------|
 | Models | `app/models/` | `users`, `drivers`, `driver_documents`, `messages`, `ride_locations`, `vehicles`, `vehicle_photos`, `bus_companies`, `routes`, `bus_trips`, `ride_offers`, `bookings`, `booking_seats`, `payments`, `ratings`, `login_codes`, with CHECK constraints for allowed values, seat counts and scores |
-| Auth | `app/auth/` | Sign up (passenger or driver) and log in with phone number and password; `/me`. One-click test-account login only when `DEMO_LOGIN` is on (never in production). SMS-code login exists in the API but is not on the website. JWT tokens valid 12 hours (Flask-JWT-Extended), Werkzeug password hashes, login codes stored as keyed hashes, and the `role_required` decorator |
+| Auth | `app/auth/` | Sign up (passenger or driver) and log in with phone number and password; `/me`. One-click test-account login only when `DEMO_LOGIN` is on (laptops, and demo or grading servers). SMS-code login exists in the API but is not on the website. JWT tokens valid 12 hours (Flask-JWT-Extended), Werkzeug password hashes, login codes stored as keyed hashes, and the `role_required` decorator |
 | Search | `app/routes/search.py` | Places, routes, ride offers, and (future phase) bus trips. Public. Also `GET /api/config` |
 | Drivers | `app/routes/drivers.py`, `app/driver_documents.py` | Legal documents (upload, replace, download your own), vehicles, and posting rides (approved drivers only) |
 | Bookings | `app/routes/bookings.py`, `app/services/booking_service.py` | Book (pending, seats held), confirm, cancel and release expired holds, without double booking |
@@ -171,7 +171,7 @@ Seat maps and QR tickets were built for buses and are part of the future phase; 
 
 ## Production safety
 
-- Every secret comes from environment variables (the server's `.env`, never in Git). With `FLASK_ENV=production`, `create_app` refuses to start if `DATABASE_URL`, `SECRET_KEY` or `JWT_SECRET_KEY` is missing, if a secret is `change-me` or under 32 characters, if both secrets are the same, or if `DEMO_LOGIN` is on. Debug is always off.
+- Every secret comes from environment variables (the server's `.env`, never in Git). With `FLASK_ENV=production`, `create_app` refuses to start if `DATABASE_URL`, `SECRET_KEY` or `JWT_SECRET_KEY` is missing, if a secret is `change-me` or under 32 characters, or if both secrets are the same. Debug is always off.
 - Flask trusts Nginx's `X-Forwarded-Proto` and `X-Forwarded-Host` (Werkzeug `ProxyFix`, production only), so links it builds, such as ticket QR codes, use `https://` and the real domain.
 - CORS is off unless `CORS_ORIGINS` lists sites: the pages and API share one domain.
 - Limits: Nginx allows 64 KB per request (6 MB on the photo and document upload addresses) and 10 requests a minute per IP address on `/api/auth/`; Flask refuses requests over 6 MB itself as well (413).

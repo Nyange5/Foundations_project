@@ -200,7 +200,7 @@ DEMO_ACCOUNTS = {"passenger": "demo.passenger@etike.test", "driver": "demo.drive
 def demo_login():
     """Log in with one click as the Demo Traveller or the Demo Driver.
 
-    Only when DEMO_LOGIN is on (never in production), and only into those two
+    Only when DEMO_LOGIN is on (off unless .env turns it on), and only into those two
     accounts, found by their reserved @etike.test emails.
     """
     if not current_app.config.get("DEMO_LOGIN"):
