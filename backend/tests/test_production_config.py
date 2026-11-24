@@ -5,7 +5,7 @@ import pytest
 from app import check_production
 
 GOOD = {
-    "DATABASE_URL": "postgresql+psycopg://u:p@db/etike",
+    "SQLALCHEMY_DATABASE_URI": "postgresql+psycopg://u:p@db/etike",
     "SECRET_KEY": "a" * 64,
     "JWT_SECRET_KEY": "b" * 64,
     "DEMO_LOGIN": False,
@@ -19,6 +19,7 @@ def test_good_settings_start():
 @pytest.mark.parametrize("change, message", [
     ({"DEMO_LOGIN": True}, "DEMO_LOGIN must be off"),
     ({"SECRET_KEY": None}, "Missing environment variables: SECRET_KEY"),
+    ({"SQLALCHEMY_DATABASE_URI": None}, "Missing environment variables: DATABASE_URL"),
     ({"JWT_SECRET_KEY": "change-me"}, "long random value for: JWT_SECRET_KEY"),
     ({"SECRET_KEY": "short"}, "long random value for: SECRET_KEY"),
     ({"JWT_SECRET_KEY": "a" * 64}, "must be different"),

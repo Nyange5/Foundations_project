@@ -12,8 +12,10 @@ from .extensions import db, jwt, migrate
 
 def check_production(config):
     """Refuse to start a server that is unsafe or half-configured."""
-    required = ("DATABASE_URL", "SECRET_KEY", "JWT_SECRET_KEY")
-    missing = [k for k in required if not config.get(k)]
+    # Environment variable -> where the config stores it.
+    required = {"DATABASE_URL": "SQLALCHEMY_DATABASE_URI",
+                "SECRET_KEY": "SECRET_KEY", "JWT_SECRET_KEY": "JWT_SECRET_KEY"}
+    missing = [env for env, key in required.items() if not config.get(key)]
     if missing:
         raise RuntimeError(f"Missing environment variables: {', '.join(missing)}")
     weak = [k for k in ("SECRET_KEY", "JWT_SECRET_KEY")
