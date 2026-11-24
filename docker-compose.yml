@@ -23,9 +23,34 @@ services:
     environment:
       FLASK_ENV: development
       SECRET_KEY: ${SECRET_KEY:-dev-only-secret}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-jwt-secret-not-for-production}
+      FEATURE_BUS_BOOKING: ${FEATURE_BUS_BOOKING:-false}
+      # One-click test accounts on the login page; fine on your own laptop.
+      DEMO_LOGIN: ${DEMO_LOGIN:-true}
+      BOOKING_HOLD_MINUTES: ${BOOKING_HOLD_MINUTES:-15}
+      CANCEL_CUTOFF_HOURS: ${CANCEL_CUTOFF_HOURS:-2}
+      # MTN MoMo sandbox and Africa's Talking sandbox keys, if you have them
+      # in .env. Without them payments return 503 and SMS is skipped.
+      MOMO_BASE_URL: ${MOMO_BASE_URL:-}
+      MOMO_TARGET_ENVIRONMENT: ${MOMO_TARGET_ENVIRONMENT:-}
+      MOMO_SUBSCRIPTION_KEY: ${MOMO_SUBSCRIPTION_KEY:-}
+      MOMO_API_USER: ${MOMO_API_USER:-}
+      MOMO_API_KEY: ${MOMO_API_KEY:-}
+      MOMO_CALLBACK_URL: ${MOMO_CALLBACK_URL:-}
+      MOMO_CURRENCY: ${MOMO_CURRENCY:-}
+      AT_USERNAME: ${AT_USERNAME:-}
+      AT_API_KEY: ${AT_API_KEY:-}
+      AT_SENDER_ID: ${AT_SENDER_ID:-}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-etike}:${POSTGRES_PASSWORD:-etike_dev_password}@db:5432/${POSTGRES_DB:-etike}
     volumes:
       - ./backend:/app
+      # So data/scripts can be run inside the container (see data/README.md).
+      - ./data:/data
+      # Car photos drivers upload; Nginx serves the same volume.
+      - uploads:/uploads
+      # Drivers' legal documents: personal data. Only the API mounts this
+      # volume; Nginx never serves it.
+      - documents:/documents
     depends_on:
       db:
         condition: service_healthy
@@ -37,8 +62,11 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./frontend:/usr/share/nginx/html:ro
+      - uploads:/var/www/uploads:ro
     depends_on:
       - api
 
 volumes:
   db_data:
+  uploads:
+  documents:

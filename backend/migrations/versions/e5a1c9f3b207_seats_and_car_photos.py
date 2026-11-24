@@ -1,3 +1,10 @@
+"""Seat numbers on bookings, and car photos
+
+Revision ID: e5a1c9f3b207
+Revises: d3e8a5c61f02
+Create Date: 2026-11-17 15:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

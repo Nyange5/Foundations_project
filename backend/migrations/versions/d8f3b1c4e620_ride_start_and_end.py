@@ -1,3 +1,10 @@
+"""Rides: when the driver started and ended them
+
+Revision ID: d8f3b1c4e620
+Revises: c2e9a7f15d40
+Create Date: 2026-11-21 17:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

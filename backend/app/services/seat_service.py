@@ -1,3 +1,16 @@
+"""Seat numbers and seat maps.
+
+Every bus trip and ride has seats numbered 1..N. A booking holds specific
+seat numbers in booking_seats, whose unique constraints make it impossible
+for two bookings to hold the same seat on the same trip or ride.
+
+Seat maps are drawn from the number of seats only; we don't know each
+vehicle's real layout, so the map is a close approximation:
+  - bus (or any vehicle with more than 8 seats): driver at the front, then
+    rows of 2 + aisle + 2, and a back row of up to 5
+  - car: driver and one passenger in front, then rows of up to 3
+"""
+
 from ..errors import ApiError, bad_request
 from ..extensions import db
 from ..models import BookingSeat

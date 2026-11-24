@@ -1,3 +1,20 @@
+"""A small client for the MTN MoMo Collections API ("request to pay").
+
+Docs: https://momodeveloper.mtn.com
+The flow is:
+  1. POST /collection/token/             -> access token (Basic auth with the
+                                            API user and API key)
+  2. POST /collection/v1_0/requesttopay  -> 202; MoMo asks the payer to approve
+                                            on their phone with their PIN
+  3. GET  /collection/v1_0/requesttopay/<reference>
+                                         -> status PENDING / SUCCESSFUL / FAILED,
+                                            with a reason when it failed
+
+Every call also sends the Collections subscription key. Uses only the
+standard library. The payment service gets a client from get_client(), which
+tests replace with a fake, so tests never call MoMo.
+"""
+
 import base64
 import json
 import logging

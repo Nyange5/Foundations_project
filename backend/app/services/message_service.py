@@ -1,3 +1,11 @@
+"""Chat between a passenger and the driver of their ride, one conversation
+per booking ("I'm at the gate in a red jacket" / "Arriving in 5 minutes").
+
+Only those two people can read it. New messages can be sent from booking
+until a day after the ride (Booking.contact_open); the history stays
+readable. Opening a conversation marks the other person's messages read.
+"""
+
 from sqlalchemy import func
 
 from ..errors import conflict, not_found

@@ -1,3 +1,10 @@
+"""Ride locations: where the driver's phone was during a ride
+
+Revision ID: e9a4c2d7f131
+Revises: d8f3b1c4e620
+Create Date: 2026-11-21 19:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

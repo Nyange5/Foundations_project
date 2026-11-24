@@ -1,6 +1,8 @@
+"""Configuration classes. Every value comes from an environment variable;
+nothing secret is stored in code."""
+
 import os
 from datetime import timedelta
-from typing import ClassVar
 
 
 class BaseConfig:
@@ -9,6 +11,9 @@ class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY")
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=12)
+    # Largest request the API accepts (driver documents are the biggest, 5 MB).
+    # Nginx has the same limits; this also covers direct calls to the API.
+    MAX_CONTENT_LENGTH = 6 * 1024 * 1024
 
     # Bus booking is a future phase: off unless FEATURE_BUS_BOOKING=true.
     FEATURE_BUS_BOOKING = os.environ.get("FEATURE_BUS_BOOKING", "").strip().lower() in (
@@ -16,7 +21,7 @@ class BaseConfig:
     )
 
     # "Try it with a test account" buttons on the login page. They log in to
-    # the TEST accounts without a password, so never switch this on for a
+    # the test accounts without a password, so never switch this on for a
     # public server. On by default only in development.
     DEMO_LOGIN = os.environ.get("DEMO_LOGIN", "").strip().lower() in ("1", "true", "yes", "on")
 
@@ -25,6 +30,9 @@ class BaseConfig:
 
     # Where uploaded car photos are saved (a Docker volume Nginx also reads).
     UPLOAD_DIR = os.environ.get("UPLOAD_DIR") or "/uploads"
+    # Drivers' legal documents: personal data, a separate Docker volume that
+    # only the API can read (Nginx never serves it).
+    DOCUMENT_DIR = os.environ.get("DOCUMENT_DIR") or "/documents"
 
     # A confirmed booking can be cancelled until this many hours before departure.
     CANCEL_CUTOFF_HOURS = float(os.environ.get("CANCEL_CUTOFF_HOURS") or 2)
@@ -32,13 +40,12 @@ class BaseConfig:
     # Other sites allowed to call the API from a browser, comma separated.
     # Empty (the default) allows none: our own pages are served from the same
     # domain through Nginx and need no CORS.
-    CORS_ORIGINS: ClassVar[list[str]] = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+    CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
     # MTN MoMo Collections API. Sandbox: https://momodeveloper.mtn.com
     MOMO_BASE_URL = os.environ.get("MOMO_BASE_URL") or "https://sandbox.momodeveloper.mtn.com"
     # "sandbox" for testing; "mtnrwanda" in production.
     MOMO_TARGET_ENVIRONMENT = os.environ.get("MOMO_TARGET_ENVIRONMENT") or "sandbox"
-    # Subscription key of the Collections product.
     MOMO_SUBSCRIPTION_KEY = os.environ.get("MOMO_SUBSCRIPTION_KEY")
     # In the sandbox, create these two with `flask momo-create-user`.
     MOMO_API_USER = os.environ.get("MOMO_API_USER")
@@ -83,6 +90,7 @@ class TestConfig(BaseConfig):
     FEATURE_BUS_BOOKING = False
     DEMO_LOGIN = False
     UPLOAD_DIR = None  # each test that uploads sets its own temporary folder
+    DOCUMENT_DIR = None
     # Tests never talk to the real MoMo or SMS services.
     MOMO_SUBSCRIPTION_KEY = MOMO_API_USER = MOMO_API_KEY = MOMO_CALLBACK_URL = None
     MOMO_TARGET_ENVIRONMENT = "sandbox"

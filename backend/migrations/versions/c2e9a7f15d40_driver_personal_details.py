@@ -1,3 +1,11 @@
+"""Drivers' personal details: national ID number, date of birth, gender, home;
+licence number filled in after sign-up
+
+Revision ID: c2e9a7f15d40
+Revises: b6f4d2a8c915
+Create Date: 2026-11-18 14:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

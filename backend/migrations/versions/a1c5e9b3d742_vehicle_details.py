@@ -1,3 +1,10 @@
+"""Car details: colour, year, air conditioning, luggage space
+
+Revision ID: a1c5e9b3d742
+Revises: f2b6d8e1a374
+Create Date: 2026-11-21 22:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

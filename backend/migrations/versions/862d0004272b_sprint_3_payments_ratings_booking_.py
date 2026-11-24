@@ -1,3 +1,10 @@
+"""Sprint 3: payments, ratings, booking expiry, driver rejection
+
+Revision ID: 862d0004272b
+Revises: e3fea51b47d8
+Create Date: 2026-11-14 15:52:22.835391
+
+"""
 from alembic import op
 import sqlalchemy as sa
 
@@ -61,3 +68,4 @@ def downgrade():
 
     op.drop_table('ratings')
     op.drop_table('payments')
+    # ### end Alembic commands ###

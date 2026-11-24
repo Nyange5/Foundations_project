@@ -1,3 +1,10 @@
+"""Log in with a code sent by SMS
+
+Revision ID: d3e8a5c61f02
+Revises: c7b2f0a91d34
+Create Date: 2026-11-17 12:00:00
+
+"""
 from alembic import op
 import sqlalchemy as sa
 

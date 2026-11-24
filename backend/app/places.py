@@ -1,3 +1,9 @@
+"""The places people travel between.
+
+These are Rwanda's districts, except that Kigali city's three districts
+(Nyarugenge, Gasabo, Kicukiro) count as one place, "Kigali", because that is
+how buses and drivers name it. The landing-page map uses the same list.
+"""
 
 PLACES = (
     "Kigali",

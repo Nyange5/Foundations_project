@@ -1,3 +1,11 @@
+"""Admin commands, run on the server:
+
+    flask --app wsgi create-admin
+    flask --app wsgi approve-driver 0781234567
+    flask --app wsgi expire-bookings
+    flask --app wsgi momo-create-user      (MoMo sandbox only)
+"""
+
 import os
 import uuid
 from urllib.parse import urlparse
@@ -5,6 +13,7 @@ from urllib.parse import urlparse
 import click
 from werkzeug.security import generate_password_hash
 
+from . import driver_documents
 from . import validation as v
 from .errors import ApiError
 from .extensions import db
@@ -48,7 +57,7 @@ def register_commands(app):
     @app.cli.command("approve-driver")
     @click.argument("phone")
     def approve_driver(phone):
-        """Approve a driver after checking their licence, so they can post rides."""
+        """Approve a driver whose legal documents are all uploaded and checked."""
         try:
             phone = v.phone(phone)
         except ApiError as err:
@@ -56,8 +65,12 @@ def register_commands(app):
         user = db.session.query(User).filter_by(phone=phone).first()
         if user is None or user.driver is None:
             raise click.ClickException(f"No driver account with phone {phone}.")
+        problems = driver_documents.problems(user.driver)
+        if problems:
+            raise click.ClickException("Can't approve yet. " + "; ".join(problems) + ".")
         user.driver.is_approved = True
         user.driver.rejected_at = None
+        user.driver.rejection_reason = None
         db.session.commit()
         click.echo(f"Approved {user.full_name} ({phone}).")
 

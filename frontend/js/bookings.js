@@ -78,7 +78,6 @@
     }
   }
 
-  // What a ride booking's badge says.
   function rideStatus(b) {
     if (b.status !== "confirmed") return STATUS[b.status];
     if (b.payment_status === "success") return "Paid";

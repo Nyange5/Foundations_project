@@ -11,7 +11,6 @@ record on a map.
 
 import math
 from datetime import timedelta
-from itertools import pairwise
 
 from ..errors import bad_request, conflict, not_found
 from ..extensions import db
@@ -131,7 +130,7 @@ def trip_record(user, offer_id):
     points = (db.session.query(RideLocation).filter_by(offer_id=offer_id)
               .order_by(RideLocation.recorded_at, RideLocation.location_id).all())
     usable = [p for p in points if p.accuracy_m is None or p.accuracy_m <= 150]
-    km = sum(_km(a, b) for a, b in pairwise(usable))  # each point and the next
+    km = sum(_km(a, b) for a, b in zip(usable, usable[1:], strict=False))  # pairs in a row
     return {
         "ride": offer.to_dict(),
         "started_at": offer.started_at.isoformat() if offer.started_at else None,
