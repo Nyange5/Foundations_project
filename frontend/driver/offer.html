@@ -31,21 +31,24 @@
   </header>
 
   <main id="main" class="page wrap page-narrow">
-    <div class="page-head">
-      <h1>My trips</h1>
-      <button class="btn-black" type="button" id="post-trip" hidden>Post a trip</button>
-    </div>
+    <h1>My trips</h1>
     <p class="page-sub" id="status"></p>
+    <nav class="modes result-tabs view-tabs" id="views" aria-label="My trips" hidden>
+      <a class="mode" href="#today"><span>Today</span></a>
+      <a class="mode" href="#upcoming"><span>Upcoming</span></a>
+      <a class="mode" href="#post"><span>Post a trip</span></a>
+      <a class="mode" href="#history"><span>History</span></a>
+    </nav>
 
-    <section class="block" aria-labelledby="trips-title" id="trips-block" hidden>
-      <h2 id="trips-title">Today and next</h2>
-      <p class="block-note">Tap <strong>Start ride</strong> when you set off and <strong>End ride</strong> when you arrive. Your passengers then pay with MTN MoMo, and you see each payment here.</p>
+    <section class="block" aria-labelledby="trips-title" id="trips-block" data-view="today" hidden>
+      <h2 id="trips-title" class="sr">Today</h2>
+      <p class="block-note">Tap <strong>Start ride</strong> when you set off and <strong>End ride</strong> when you arrive. Passengers then pay with MTN MoMo.</p>
       <ul class="trips" id="trips"></ul>
       <p class="trip-msg" id="trips-msg" role="alert"></p>
     </section>
 
-    <section class="block" aria-labelledby="ride-title" id="ride-block" hidden>
-      <h2 id="ride-title">Post a trip</h2>
+    <section class="block" aria-labelledby="ride-title" id="ride-block" data-view="post">
+      <h2 id="ride-title" class="sr">Post a trip</h2>
       <form class="form" id="ride" novalidate>
           <div class="modes" role="radiogroup" aria-label="Type of ride">
             <label class="mode">
@@ -97,14 +100,17 @@
       </form>
     </section>
 
-    <section class="block" aria-labelledby="posted-title" id="posted-block" hidden>
-      <h2 id="posted-title">Upcoming trips</h2>
+    <section class="block" aria-labelledby="posted-title" id="posted-block" data-view="upcoming">
+      <h2 id="posted-title" class="sr">Upcoming trips</h2>
       <ul class="trips" id="posted"></ul>
     </section>
 
-    <div id="my-reviews" class="setup"></div>
+    <section class="block" aria-labelledby="history-title" data-view="history">
+      <h2 id="history-title" class="sr">History</h2>
+      <ul class="trips" id="history"></ul>
+    </section>
 
-    <section class="block setup" aria-labelledby="details-title" id="setup">
+    <section class="block" data-view="setup" aria-labelledby="details-title" id="setup">
       <h2 id="details-title">1. Your details</h2>
       <p class="block-note" id="details-note">As on your national ID and driving licence. Only ETIKE's reviewers see them; passengers never do.</p>
       <form class="form" id="details" novalidate>
@@ -141,14 +147,14 @@
       </form>
     </section>
 
-    <section class="block setup" aria-labelledby="documents-title">
+    <section class="block" data-view="setup" aria-labelledby="documents-title">
       <h2 id="documents-title">2. Your documents</h2>
       <p class="block-note">In Rwanda, carrying passengers for money needs RURA authorisation. If you drive for a taxi company or cooperative, upload its RURA licence with proof that you drive for it. Upload a clear photo or PDF of each document (under 5 MB). We check them, then approve your account. Only you and ETIKE's reviewers can see them.</p>
       <ul class="doc-list" id="documents"></ul>
       <p class="trip-msg" id="documents-msg" role="alert"></p>
     </section>
 
-    <section class="block setup" aria-labelledby="vehicles-title">
+    <section class="block" data-view="setup" aria-labelledby="vehicles-title">
       <h2 id="vehicles-title">Your vehicles</h2>
       <ul class="results" id="vehicles"></ul>
       <form class="form" id="vehicle" novalidate>

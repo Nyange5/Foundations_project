@@ -275,6 +275,13 @@ def my_rides():
     return jsonify({"rides": ride_service.driver_rides(current_user().driver)})
 
 
+@drivers_bp.get("/drivers/rides/history")
+@role_required("driver")
+def ride_history():
+    """The driver's past rides, newest first."""
+    return jsonify({"rides": ride_service.driver_history(current_user().driver)})
+
+
 def _optional_location(data):
     """The phone's position, or None: a vague or odd one never blocks the ride."""
     try:
