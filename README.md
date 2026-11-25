@@ -1,6 +1,6 @@
 # ETIKE Intercity Travel Platform
 
-**Live site: TBD** (to be filled in once the server is up; see [docs/deployment.md](docs/deployment.md))
+**Live site: https://etike.indiasouthcentral.cloudapp.azure.com** (try it with the Demo traveller or Demo driver buttons on the login page)
 
 ETIKE is a website for travelling between districts in Rwanda. Drivers post the trips they are making; passengers book a **private car** (the whole car, one price shown up front) or a **shared seat** in a car already going their way, and pay with MTN MoMo in the app when the ride ends, like a taxi app. Users are passengers, drivers and admins.
 
