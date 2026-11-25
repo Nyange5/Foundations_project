@@ -1013,18 +1013,6 @@ a {
   gap: 1rem;
 }
 
-/* Page title with its main action (My trips: Post a trip). */
-.page-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.page-head .btn-black {
-  padding: 0.75rem 1.25rem;
-  font-size: 1rem;
-}
 .form-actions {
   display: flex;
   gap: 0.5rem;
@@ -1034,8 +1022,16 @@ a {
   padding: 0.95rem 1.5rem;
   margin-top: 0.25rem;
 }
-/* Approved drivers: details, documents and car are on the Account page. */
-.setup-done .setup {
+/* My trips: one tab at a time. */
+.view-tabs {
+  margin-top: 1.5rem;
+}
+main:not([data-show]) [data-view],
+main[data-show="today"] [data-view]:not([data-view="today"]),
+main[data-show="upcoming"] [data-view]:not([data-view="upcoming"]),
+main[data-show="post"] [data-view]:not([data-view="post"]),
+main[data-show="setup"] [data-view]:not([data-view="setup"]),
+main[data-show="history"] [data-view]:not([data-view="history"]) {
   display: none;
 }
 

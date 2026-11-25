@@ -9,25 +9,30 @@
   const rideForm = document.getElementById("ride");
   const rideMsg = document.getElementById("ride-msg");
   const f = rideForm.elements;
-  const postBtn = document.getElementById("post-trip");
-  const rideBlock = document.getElementById("ride-block");
+  const main = document.getElementById("main");
+  const tabs = document.getElementById("views");
   let vehicles = [];
+  let approved = false;
 
-  // "Post a trip" opens the form; posting or Cancel closes it.
-  function showRideForm(open) {
-    ui.say(rideMsg, "");
-    rideBlock.hidden = !open;
-    postBtn.hidden = open;
-    if (open) {
-      rideBlock.scrollIntoView({ behavior: "smooth", block: "start" });
-      f.vehicle_id.focus({ preventScroll: true });
-    }
+  // Tabs: #today, #upcoming, #post; #setup for details, documents and cars.
+  function showView() {
+    const want = location.hash.slice(1);
+    const view = !approved ? "setup"
+      : ["today", "upcoming", "post", "history", "setup"].includes(want) ? want : "today";
+    main.dataset.show = view;
+    tabs.hidden = !approved;
+    tabs.querySelectorAll("a").forEach((a) => {
+      if (a.hash === `#${view}`) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
   }
-  postBtn.addEventListener("click", () => showRideForm(true));
+  window.addEventListener("hashchange", () => {
+    ui.say(rideMsg, "");
+    showView();
+  });
   document.getElementById("ride-cancel").addEventListener("click", () => {
     ui.clearErrors(rideForm);
-    ui.say(rideMsg, "");
-    showRideForm(false);
+    location.hash = "#upcoming";
   });
 
   const docList = document.getElementById("documents");
@@ -43,6 +48,7 @@
     showDocuments(await api.get("/drivers/documents"));
   } catch (err) {
     ui.say(docMsg, err.message);
+    showView();
   }
 
   // Personal details: editable until the account is approved.
@@ -72,27 +78,12 @@
     }
   });
 
-  // What passengers say about this driver (the same reviews they see).
-  let reviewsShown = false;
-  async function showMyReviews(driver) {
-    if (reviewsShown || driver.status !== "approved") return;
-    reviewsShown = true;
-    try {
-      const said = await api.get(`/drivers/${driver.driver_id}/ratings`);
-      document.getElementById("my-reviews").replaceChildren(
-        ui.reviews(said, { empty: "No reviews yet. After your first rides, passengers' reviews show here." }));
-    } catch (err) {
-      // Not essential on this page.
-    }
-  }
-
   function showDocuments({ documents, details, driver }) {
-    showMyReviews(driver);
     showDetails(details, driver.status === "approved");
     const missing = documents.filter((d) => !d.uploaded || d.expired).length;
     const noDetails = DETAIL_FIELDS.some((name) => !details[name]);
     if (driver.status === "approved") {
-      status.textContent = "Your driver account is approved. Rides you post show up in search.";
+      status.textContent = "";
     } else if (driver.status === "rejected") {
       status.textContent = `We could not approve your account${driver.rejection_reason ? `: ${driver.rejection_reason}` : "."} Upload a corrected document below and we will check again.`;
     } else if (noDetails) {
@@ -102,12 +93,9 @@
     } else {
       status.textContent = "Thanks, all your documents are in. We are checking them; you can post rides once your account is approved.";
     }
-    const approved = driver.status === "approved";
+    approved = driver.status === "approved";
     rideForm.querySelector("button").disabled = !approved;
-    if (approved && rideBlock.hidden) postBtn.hidden = false;
-    // Approved: details, documents and car live on the Account page.
-    document.getElementById("main").classList.toggle("setup-done",
-      approved && location.hash !== "#setup");
+    showView();
     docList.replaceChildren(...documents.map(documentRow));
   }
 
@@ -377,8 +365,8 @@
         `${ride.origin} to ${ride.destination}, ${ui.when(ride.departure_time)}, ${ui.money(ride.price)}.`);
       rideForm.reset();
       syncRide();
-      showRideForm(false);
       document.dispatchEvent(new Event("rides:changed"));
+      location.hash = "#upcoming";
     } catch (err) {
       ui.formError(rideForm, rideMsg, err);
     }

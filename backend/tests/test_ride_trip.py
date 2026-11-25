@@ -179,3 +179,23 @@ def test_only_people_on_the_ride_see_where_it_went(client, ride, passenger):
     assert client.get(f"/api/rides/{offer_id}/track", headers=other_passenger).status_code == 404
     assert client.get(f"/api/rides/{offer_id}/track", headers=other_driver).status_code == 404
     assert client.get(f"/api/rides/{offer_id}/track").status_code == 401
+
+
+def test_history_lists_past_rides_newest_first(app, client, ride, passenger):
+    from app.extensions import db
+    from app.models import RideOffer
+    from app.validation import local_now
+
+    driver, offer_id = ride()
+    book(client, passenger, offer_id)
+    start(client, driver, offer_id)
+    end(client, driver, offer_id)
+    with app.app_context():
+        db.session.get(RideOffer, offer_id).departure_time = local_now() - timedelta(hours=3)
+        db.session.commit()
+
+    rides = client.get("/api/drivers/rides/history", headers=driver).get_json()["rides"]
+
+    assert [r["offer_id"] for r in rides] == [offer_id]
+    assert rides[0]["progress"] == "ended" and rides[0]["to_collect"] > 0
+    assert client.get("/api/drivers/rides/history", headers=passenger).status_code == 403

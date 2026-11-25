@@ -52,6 +52,20 @@ def driver_rides(driver):
     return [ride_dict(o) for o in offers]
 
 
+def driver_history(driver, limit=50):
+    """Past rides, newest first."""
+    offers = (
+        db.session.query(RideOffer)
+        .filter(RideOffer.driver_id == driver.driver_id,
+                RideOffer.departure_time < local_now(),
+                RideOffer.status != "cancelled")
+        .order_by(RideOffer.departure_time.desc())
+        .limit(limit)
+        .all()
+    )
+    return [ride_dict(o) for o in offers]
+
+
 def ride_dict(offer):
     bookings = _confirmed(offer)
     unread = message_service.unread_for_driver(offer.driver.user, bookings)

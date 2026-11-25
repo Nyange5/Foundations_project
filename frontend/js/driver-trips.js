@@ -21,6 +21,39 @@
   await load();
   setInterval(() => { if (!document.hidden && needsWatching()) load(true); }, 10000);
   document.addEventListener("rides:changed", () => load());
+  window.addEventListener("hashchange", loadHistory);
+  loadHistory();
+
+  // Past trips, loaded when the History tab opens.
+  async function loadHistory() {
+    if (location.hash !== "#history") return;
+    const list = document.getElementById("history");
+    try {
+      const past = (await api.get("/drivers/rides/history")).rides;
+      if (!past.length) {
+        list.replaceChildren(ui.el("li", "trip-empty", "No past trips yet."));
+        return;
+      }
+      list.replaceChildren(...past.map((r) => {
+        const li = ui.el("li", "trip");
+        li.append(ui.el("strong", null, `${r.origin} to ${r.destination}`),
+          ui.el("span", "trip-when", `${ui.when(r.departure_time)} · ${r.vehicle.model}${
+            { scheduled: " · not started", in_progress: " · on the road" }[r.progress] || ""}`));
+        const seats = r.passengers.reduce((n, p) => n + p.seats, 0);
+        li.append(ui.el("span", "trip-when", seats
+          ? `${seats} seat${seats > 1 ? "s" : ""} booked · received ${ui.money(r.paid)} of ${ui.money(r.to_collect)}`
+          : "No bookings"));
+        if (r.progress === "ended") {
+          const map = ui.el("a", null, "See the trip on the map");
+          map.href = `/trip.html?ride=${r.offer_id}`;
+          li.append(map);
+        }
+        return li;
+      }));
+    } catch (err) {
+      list.replaceChildren(ui.el("li", "trip-empty", err.message));
+    }
+  }
 
   async function load(quietly = false) {
     try {
@@ -59,8 +92,16 @@
   function renderPosted() {
     const upcoming = rides.filter((r) => r.progress === "scheduled"
       && new Date(r.departure_time) > Date.now());
-    document.getElementById("posted-block").hidden = !upcoming.length;
-    document.getElementById("posted").replaceChildren(...upcoming.map((r) => {
+    const list = document.getElementById("posted");
+    if (!upcoming.length) {
+      const empty = ui.el("li", "trip-empty", "No upcoming trips. ");
+      const post = ui.el("a", null, "Post a trip");
+      post.href = "#post";
+      empty.append(post);
+      list.replaceChildren(empty);
+      return;
+    }
+    list.replaceChildren(...upcoming.map((r) => {
       const li = ui.el("li", "trip");
       li.append(ui.el("strong", null, `${r.origin} to ${r.destination}`),
         ui.el("span", "trip-when", `${ui.when(r.departure_time)} · ${r.vehicle.model}`));
