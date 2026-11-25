@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>My account – ETIKE</title>
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ETIKE</a>
+      <nav aria-label="Main">
+        <ul class="topbar-links">
+          <li data-for="visitor passenger"><a href="/">Find a trip</a></li>
+        </ul>
+      </nav>
+      <div class="account" id="account"></div>
+    </div>
+  </header>
+
+  <main id="main" class="page wrap page-narrow">
+    <h1>My account</h1>
+
+    <p class="loading" id="loading">Loading…</p>
+    <p class="trip-msg" id="msg" role="alert"></p>
+
+    <section class="block" aria-labelledby="me-title">
+      <h2 id="me-title" class="sr">You</h2>
+      <div class="profile" id="profile"></div>
+    </section>
+
+    <section class="block" aria-labelledby="driver-title" id="driver-block" hidden>
+      <h2 id="driver-title">Driver details</h2>
+      <dl class="facts" id="facts"></dl>
+    </section>
+
+    <section class="block" aria-labelledby="cars-title" id="cars-block" hidden>
+      <h2 id="cars-title">Your cars</h2>
+      <ul class="results" id="cars"></ul>
+    </section>
+
+    <div id="reviews" class="block"></div>
+
+    <div class="form-actions block" id="actions"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a class="brand" href="/">ETIKE</a>
+          <p>Private cars and shared seats between Rwanda's districts.</p>
+        </div>
+        <nav class="footer-cols" aria-label="Footer">
+          <div data-for="visitor passenger">
+            <h2>Travel</h2>
+            <ul>
+              <li data-feature="bus"><a href="/search.html?type=bus">Bus tickets</a></li>
+              <li><a href="/search.html?type=private">Private car</a></li>
+              <li><a href="/search.html?type=shared">Shared seat</a></li>
+            </ul>
+          </div>
+          <div data-for="visitor driver">
+            <h2>Drive</h2>
+            <ul>
+              <li data-for="visitor"><a href="/register.html?role=driver">Become a driver</a></li>
+              <li><a href="/driver/offer.html">Post a ride</a></li>
+            </ul>
+          </div>
+          <div data-for="visitor passenger">
+            <h2>Account</h2>
+            <ul>
+              <li data-for="visitor"><a href="/login.html">Log in</a></li>
+              <li data-for="visitor"><a href="/register.html">Sign up</a></li>
+              <li data-for="passenger"><a href="/bookings.html">My bookings</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 ETIKE</p>
+        <p>Kigali, Rwanda</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/account.js"></script>
+</body>
+</html>

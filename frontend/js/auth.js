@@ -97,16 +97,13 @@ const auth = (() => {
       return;
     }
     document.querySelector(".brand").href = homeFor(u);
-    const name = document.createElement("span");
-    name.className = "account-name";
-    name.textContent = u.full_name.split(" ")[0];
-    box.append(name);
+    link("/account.html", u.full_name.split(" ")[0], "account-name").title = "My account";
     if (u.role === "admin") {
       link("/admin/drivers.html", "Drivers");
       link("/admin/companies.html", "Companies").dataset.feature = "bus";
       // Refunds only come from bus tickets.
       link("/admin/refunds.html", "Refunds").dataset.feature = "bus";
-    } else if (u.role === "driver") link("/driver/offer.html", "Post a ride");
+    } else if (u.role === "driver") link("/driver/offer.html", "My trips");
     else link("/bookings.html", "My bookings");
     const out = document.createElement("button");
     out.type = "button";
@@ -204,12 +201,16 @@ const auth = (() => {
     name.textContent = u.full_name;
     const meta = document.createElement("span");
     meta.textContent = `${role} · 0${u.phone.slice(4)}`;
+    const mine = document.createElement("a");
+    mine.className = "btn-gray";
+    mine.href = "/account.html";
+    mine.textContent = "My account";
     const out = document.createElement("button");
     out.type = "button";
     out.className = "btn-black";
     out.textContent = "Log out";
     out.addEventListener("click", logout);
-    sheet.append(name, meta, out);
+    sheet.append(name, meta, mine, out);
     document.body.append(sheet);
     button.setAttribute("aria-expanded", "true");
     out.focus();

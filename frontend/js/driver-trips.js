@@ -20,6 +20,7 @@
 
   await load();
   setInterval(() => { if (!document.hidden && needsWatching()) load(true); }, 10000);
+  document.addEventListener("rides:changed", () => load());
 
   async function load(quietly = false) {
     try {
@@ -54,7 +55,26 @@
     return current().length > 0;
   }
 
+  // Every ride still to come, booked or not.
+  function renderPosted() {
+    const upcoming = rides.filter((r) => r.progress === "scheduled"
+      && new Date(r.departure_time) > Date.now());
+    document.getElementById("posted-block").hidden = !upcoming.length;
+    document.getElementById("posted").replaceChildren(...upcoming.map((r) => {
+      const li = ui.el("li", "trip");
+      li.append(ui.el("strong", null, `${r.origin} to ${r.destination}`),
+        ui.el("span", "trip-when", `${ui.when(r.departure_time)} · ${r.vehicle.model}`));
+      const booked = r.passengers.reduce((n, p) => n + p.seats, 0);
+      const what = r.ride_type === "private"
+        ? `Private car, ${ui.money(r.price)}${booked ? " · booked" : ""}`
+        : `Shared, ${ui.money(r.price)} a seat · ${booked} booked, ${r.seats_available} free`;
+      li.append(ui.el("span", "trip-when", what));
+      return li;
+    }));
+  }
+
   function render() {
+    renderPosted();
     const items = current();
     block.hidden = false;
     if (!items.length) {
