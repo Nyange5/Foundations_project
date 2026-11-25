@@ -20,10 +20,9 @@ venv/
 data/raw/*
 !data/raw/.gitkeep
 
-# Local sample data tool: its fake accounts and rides are never committed
-# (real data only). The car photos it uses (backend/local_test_photos/,
-# free-licence photos with CREDITS.txt) are in Git, for demos.
+# Local sample data tool and its car photos: never committed (real data only).
 backend/local_test_data.py
+backend/local_test_photos/
 
 # Consent records for real data: kept outside the repository (see data/sources.md)
 data/consent/

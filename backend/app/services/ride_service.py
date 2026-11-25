@@ -14,8 +14,9 @@ from datetime import timedelta
 
 from ..errors import bad_request, conflict, not_found
 from ..extensions import db
-from ..models import Booking, RideLocation, RideOffer
+from ..models import Booking, RideLocation, RideOffer, Route
 from ..models.user import utcnow
+from ..places import drive_time
 from ..validation import local_now
 from . import message_service, sms_service
 
@@ -28,6 +29,10 @@ MAX_POINTS = 2000          # about 16 hours at one point every 30 s
 
 # A driver can start a ride from this long before its departure time.
 START_EARLY = timedelta(hours=1)
+# Rest and refuel between arriving and setting off again.
+TURNAROUND = timedelta(minutes=30)
+# How late a driver may be at the start of a ride they are posting.
+REACH_SLACK = timedelta(minutes=15)
 # The driver's list shows rides from this far back (to follow payments).
 RECENT = timedelta(days=2)
 
@@ -71,6 +76,46 @@ def ride_dict(offer):
         "paid": sum(p["amount"] for p in passengers if p["payment_status"] == "success"),
         "to_collect": sum(p["amount"] for p in passengers),
     }
+
+
+def check_schedule(driver, origin, destination, departure, here=None):
+    """Refuse a ride the driver couldn't make: one of their other rides would
+    still be on the road, or they couldn't drive between the two in time.
+    `here` is the driver's phone position ((lat, lng, ...)), if they shared it."""
+    def when(t):
+        return t.strftime("%H:%M on %a %d %b")
+
+    if here is not None:
+        arrive = local_now() + drive_time(here[:2], origin)
+        if arrive > departure + REACH_SLACK:
+            raise conflict(f"From where you are now, you'd reach {origin} around "
+                           f"{arrive:%H:%M}. Choose a later departure time.", "cannot_reach")
+
+    nearby = (
+        db.session.query(RideOffer).join(Route)
+        .filter(RideOffer.driver_id == driver.driver_id,
+                RideOffer.status != "cancelled",
+                RideOffer.ended_at.is_(None),
+                RideOffer.departure_time.between(departure - timedelta(days=1),
+                                                 departure + timedelta(days=1)))
+        .order_by(RideOffer.departure_time)
+        .all()
+    )
+    for other in nearby:
+        a, b = other.route.origin, other.route.destination
+        # This ride after the other one: drive it, then get from b to origin.
+        earliest = other.departure_time + drive_time(a, b) + drive_time(b, origin) + TURNAROUND
+        # This ride before the other one: drive it, then get to a.
+        latest = other.departure_time - drive_time(origin, destination) \
+            - drive_time(destination, a) - TURNAROUND
+        if departure >= earliest or departure <= latest:
+            continue
+        if departure > other.departure_time:
+            hint = f"The earliest you could leave {origin} after it is {when(earliest)}."
+        else:
+            hint = f"To make both, leave {origin} by {when(latest)}."
+        raise conflict(f"This clashes with your ride from {a} to {b} at "
+                       f"{when(other.departure_time)}. {hint}", "schedule_clash")
 
 
 def location_from(data):

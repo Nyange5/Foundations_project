@@ -840,6 +840,11 @@ a {
     color: var(--gray-700);
     margin-bottom: 0.5rem;
   }
+  .sheet .btn-gray {
+    padding: 0.95rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+  }
   /* The top bar stays put while scrolling, like an app header. */
   .topbar {
     position: sticky;
@@ -1006,6 +1011,89 @@ a {
   margin-top: 2.5rem;
   display: grid;
   gap: 1rem;
+}
+
+/* Page title with its main action (My trips: Post a trip). */
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.page-head .btn-black {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+}
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.form-actions .btn-gray {
+  padding: 0.95rem 1.5rem;
+  margin-top: 0.25rem;
+}
+/* Approved drivers: details, documents and car are on the Account page. */
+.setup-done .setup {
+  display: none;
+}
+
+/* Account page */
+.profile {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--gray-50);
+}
+.profile-name {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.profile-meta {
+  color: var(--gray-700);
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6rem 1.5rem;
+}
+.facts dt {
+  color: var(--gray-500);
+}
+.facts dd {
+  margin: 0;
+  font-weight: 500;
+}
+.badge {
+  justify-self: start;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--gray-200);
+}
+.badge.is-good {
+  background: var(--good);
+  color: var(--white);
+}
+.badge.is-bad {
+  background: var(--bad);
+  color: var(--white);
+}
+.result.car-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.result.car-row img {
+  width: 6rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: var(--radius);
 }
 
 /* Results and bookings */

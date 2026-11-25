@@ -9,7 +9,26 @@
   const rideForm = document.getElementById("ride");
   const rideMsg = document.getElementById("ride-msg");
   const f = rideForm.elements;
+  const postBtn = document.getElementById("post-trip");
+  const rideBlock = document.getElementById("ride-block");
   let vehicles = [];
+
+  // "Post a trip" opens the form; posting or Cancel closes it.
+  function showRideForm(open) {
+    ui.say(rideMsg, "");
+    rideBlock.hidden = !open;
+    postBtn.hidden = open;
+    if (open) {
+      rideBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+      f.vehicle_id.focus({ preventScroll: true });
+    }
+  }
+  postBtn.addEventListener("click", () => showRideForm(true));
+  document.getElementById("ride-cancel").addEventListener("click", () => {
+    ui.clearErrors(rideForm);
+    ui.say(rideMsg, "");
+    showRideForm(false);
+  });
 
   const docList = document.getElementById("documents");
   const docMsg = document.getElementById("documents-msg");
@@ -83,7 +102,12 @@
     } else {
       status.textContent = "Thanks, all your documents are in. We are checking them; you can post rides once your account is approved.";
     }
-    rideForm.querySelector("button").disabled = driver.status !== "approved";
+    const approved = driver.status === "approved";
+    rideForm.querySelector("button").disabled = !approved;
+    if (approved && rideBlock.hidden) postBtn.hidden = false;
+    // Approved: details, documents and car live on the Account page.
+    document.getElementById("main").classList.toggle("setup-done",
+      approved && location.hash !== "#setup");
     docList.replaceChildren(...documents.map(documentRow));
   }
 
@@ -316,6 +340,20 @@
     }
   });
 
+  // Where the driver is now, so the server can check they can reach the
+  // start in time. Null if they don't share it.
+  function here() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      setTimeout(() => resolve(null), 10000); // an unanswered prompt never blocks posting
+      navigator.geolocation.getCurrentPosition(
+        (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        () => resolve(null),
+        { timeout: 8000, maximumAge: 5 * 60 * 1000 },
+      );
+    });
+  }
+
   rideForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     ui.clearErrors(rideForm);
@@ -332,16 +370,15 @@
       body.seats_available = Number(f.seats_available.value);
     }
     try {
-      const { ride } = await ui.busy(rideForm.querySelector("button"), "Posting…", () =>
-        api.post("/rides", body),
+      const { ride } = await ui.busy(rideForm.querySelector("button"), "Posting…", async () =>
+        api.post("/rides", { ...body, current_location: await here() }),
       );
-      ui.say(
-        rideMsg,
-        `Posted: ${ride.origin} to ${ride.destination}, ${ui.when(ride.departure_time)}, ${ui.money(ride.price)}.`,
-        "info",
-      );
+      ui.toast("Trip posted",
+        `${ride.origin} to ${ride.destination}, ${ui.when(ride.departure_time)}, ${ui.money(ride.price)}.`);
       rideForm.reset();
       syncRide();
+      showRideForm(false);
+      document.dispatchEvent(new Event("rides:changed"));
     } catch (err) {
       ui.formError(rideForm, rideMsg, err);
     }

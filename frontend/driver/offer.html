@@ -31,7 +31,10 @@
   </header>
 
   <main id="main" class="page wrap page-narrow">
-    <h1>My trips</h1>
+    <div class="page-head">
+      <h1>My trips</h1>
+      <button class="btn-black" type="button" id="post-trip" hidden>Post a trip</button>
+    </div>
     <p class="page-sub" id="status"></p>
 
     <section class="block" aria-labelledby="trips-title" id="trips-block" hidden>
@@ -41,9 +44,67 @@
       <p class="trip-msg" id="trips-msg" role="alert"></p>
     </section>
 
-    <div id="my-reviews"></div>
+    <section class="block" aria-labelledby="ride-title" id="ride-block" hidden>
+      <h2 id="ride-title">Post a trip</h2>
+      <form class="form" id="ride" novalidate>
+          <div class="modes" role="radiogroup" aria-label="Type of ride">
+            <label class="mode">
+              <input type="radio" name="ride_type" value="shared" checked>
+              <span>Shared seats</span>
+            </label>
+            <label class="mode">
+              <input type="radio" name="ride_type" value="private">
+              <span>Private, whole car</span>
+            </label>
+          </div>
+        <label class="field">
+          <span>Vehicle</span>
+          <select name="vehicle_id" required></select>
+        </label>
+        <div class="stops">
+          <label class="stop stop-from">
+            <span class="sr">Leaving from</span>
+            <select name="origin" required></select>
+          </label>
+          <label class="stop stop-to">
+            <span class="sr">Going to</span>
+            <select name="destination" required></select>
+          </label>
+        </div>
+        <label class="field">
+          <span>Meeting point</span>
+          <input type="text" name="pickup_point" maxlength="200" autocomplete="off" placeholder="e.g. Nyabugogo bus park, gate 2" required>
+        </label>
+        <p class="field-hint">Where passengers find you. Be precise: a landmark helps.</p>
+        <label class="field">
+          <span>Departure</span>
+          <input type="datetime-local" name="departure_time" required>
+        </label>
+        <label class="field">
+          <span id="price-label">Price per seat (RWF)</span>
+          <input type="number" name="price" min="1" step="1" inputmode="numeric" required>
+        </label>
+        <label class="field" id="seats-field">
+          <span>Seats you are offering</span>
+          <input type="number" name="seats_available" min="1" inputmode="numeric">
+        </label>
+        <p class="field-hint">We check you can make it: time to drive from your other rides, and from where you are now if you share your location.</p>
+        <div class="form-actions">
+          <button class="btn-black" type="submit">Post trip</button>
+          <button class="btn-gray" type="button" id="ride-cancel">Cancel</button>
+        </div>
+        <p class="trip-msg" id="ride-msg" role="alert"></p>
+      </form>
+    </section>
 
-    <section class="block" aria-labelledby="details-title">
+    <section class="block" aria-labelledby="posted-title" id="posted-block" hidden>
+      <h2 id="posted-title">Upcoming trips</h2>
+      <ul class="trips" id="posted"></ul>
+    </section>
+
+    <div id="my-reviews" class="setup"></div>
+
+    <section class="block setup" aria-labelledby="details-title" id="setup">
       <h2 id="details-title">1. Your details</h2>
       <p class="block-note" id="details-note">As on your national ID and driving licence. Only ETIKE's reviewers see them; passengers never do.</p>
       <form class="form" id="details" novalidate>
@@ -80,14 +141,14 @@
       </form>
     </section>
 
-    <section class="block" aria-labelledby="documents-title">
+    <section class="block setup" aria-labelledby="documents-title">
       <h2 id="documents-title">2. Your documents</h2>
       <p class="block-note">In Rwanda, carrying passengers for money needs RURA authorisation. If you drive for a taxi company or cooperative, upload its RURA licence with proof that you drive for it. Upload a clear photo or PDF of each document (under 5 MB). We check them, then approve your account. Only you and ETIKE's reviewers can see them.</p>
       <ul class="doc-list" id="documents"></ul>
       <p class="trip-msg" id="documents-msg" role="alert"></p>
     </section>
 
-    <section class="block" aria-labelledby="vehicles-title">
+    <section class="block setup" aria-labelledby="vehicles-title">
       <h2 id="vehicles-title">Your vehicles</h2>
       <ul class="results" id="vehicles"></ul>
       <form class="form" id="vehicle" novalidate>
@@ -139,54 +200,6 @@
       </form>
     </section>
 
-    <section class="block" aria-labelledby="ride-title">
-      <h2 id="ride-title">New ride</h2>
-      <form class="form" id="ride" novalidate>
-          <div class="modes" role="radiogroup" aria-label="Type of ride">
-            <label class="mode">
-              <input type="radio" name="ride_type" value="shared" checked>
-              <span>Shared seats</span>
-            </label>
-            <label class="mode">
-              <input type="radio" name="ride_type" value="private">
-              <span>Private, whole car</span>
-            </label>
-          </div>
-        <label class="field">
-          <span>Vehicle</span>
-          <select name="vehicle_id" required></select>
-        </label>
-        <div class="stops">
-          <label class="stop stop-from">
-            <span class="sr">Leaving from</span>
-            <select name="origin" required></select>
-          </label>
-          <label class="stop stop-to">
-            <span class="sr">Going to</span>
-            <select name="destination" required></select>
-          </label>
-        </div>
-        <label class="field">
-          <span>Meeting point</span>
-          <input type="text" name="pickup_point" maxlength="200" autocomplete="off" placeholder="e.g. Nyabugogo bus park, gate 2" required>
-        </label>
-        <p class="field-hint">Where passengers find you. Be precise: a landmark helps.</p>
-        <label class="field">
-          <span>Departure</span>
-          <input type="datetime-local" name="departure_time" required>
-        </label>
-        <label class="field">
-          <span id="price-label">Price per seat (RWF)</span>
-          <input type="number" name="price" min="1" step="1" inputmode="numeric" required>
-        </label>
-        <label class="field" id="seats-field">
-          <span>Seats you are offering</span>
-          <input type="number" name="seats_available" min="1" inputmode="numeric">
-        </label>
-        <button class="btn-black" type="submit">Post ride</button>
-        <p class="trip-msg" id="ride-msg" role="alert"></p>
-      </form>
-    </section>
   </main>
 
   <footer class="footer">

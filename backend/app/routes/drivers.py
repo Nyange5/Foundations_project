@@ -275,11 +275,19 @@ def my_rides():
     return jsonify({"rides": ride_service.driver_rides(current_user().driver)})
 
 
+def _optional_location(data):
+    """The phone's position, or None: a vague or odd one never blocks the ride."""
+    try:
+        return ride_service.location_from(data)
+    except ApiError:
+        return None
+
+
 @drivers_bp.post("/rides/<int:offer_id>/start")
 @role_required("driver")
 def start_ride(offer_id):
     # The body may carry where the phone is ({lat, lng, accuracy}); optional.
-    location = ride_service.location_from(request.get_json(silent=True))
+    location = _optional_location(request.get_json(silent=True))
     offer = ride_service.start(current_user().driver, offer_id, location)
     return jsonify({"ride": ride_service.ride_dict(offer)})
 
@@ -288,7 +296,7 @@ def start_ride(offer_id):
 @role_required("driver")
 def end_ride(offer_id):
     """End the ride: its passengers can now pay with MoMo."""
-    location = ride_service.location_from(request.get_json(silent=True))
+    location = _optional_location(request.get_json(silent=True))
     offer = ride_service.end(current_user().driver, offer_id, location)
     return jsonify({"ride": ride_service.ride_dict(offer)})
 
@@ -343,6 +351,11 @@ def post_ride():
     )
     # Where passengers meet the driver, so nobody is left wondering.
     pickup = v.text(data, "pickup_point", min_len=5, max_len=200)
+    try:
+        here = ride_service.location_from(data.get("current_location"))
+    except ApiError:
+        here = None  # a bad phone position never blocks posting
+    ride_service.check_schedule(driver, origin, destination, departure, here)
 
     offer = RideOffer(
         driver_id=driver.driver_id,

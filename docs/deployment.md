@@ -255,17 +255,17 @@ The list of required documents is in `backend/app/driver_documents.py`. It follo
 For a server only the team and the facilitator use, load the sample data and turn on the one-click demo logins, so nobody has to create accounts:
 
 ```bash
-# On your laptop: copy the script to the server
-scp backend/local_test_data.py USER@YOUR_DOMAIN:~/
+# On your laptop: copy the script and its car photos to the server
+scp -r backend/local_test_data.py backend/local_test_photos USER@YOUR_DOMAIN:~/
 # On the server
 docker compose -f docker-compose.prod.yml cp ~/local_test_data.py api:/app/local_test_data.py
-docker compose -f docker-compose.prod.yml cp backend/local_test_photos api:/app/local_test_photos
+docker compose -f docker-compose.prod.yml cp ~/local_test_photos api:/app/local_test_photos
 docker compose -f docker-compose.prod.yml exec api python local_test_data.py load
 sed -i 's/^DEMO_LOGIN=.*/DEMO_LOGIN=true/' .env
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-The login page then shows **Demo traveller** and **Demo driver**. They open only those two `@etike.test` accounts, never an admin or a real account. The sample rides are dated from the day you load them: run `load` again before a demo to move them forward (copy the script in again after a deploy, which rebuilds the container). Afterwards set `DEMO_LOGIN=false` and run `python local_test_data.py clear`.
+The login page then shows **Demo traveller** and **Demo driver**. They open only those two `@etike.test` accounts, never an admin or a real account. The sample rides are dated from the day you load them: run `load` again before a demo to move them forward (copy the script and photos in again after a deploy, which rebuilds the container). Afterwards set `DEMO_LOGIN=false` and run `python local_test_data.py clear`.
 
 Then, on a phone: sign up as a passenger, search a real route, book a ride, cancel it.
 
