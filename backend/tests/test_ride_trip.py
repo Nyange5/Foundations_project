@@ -156,14 +156,18 @@ def test_location_rules(client, ride, passenger):
     before_start = client.post(f"/api/rides/{offer_id}/locations", json=KIGALI, headers=driver)
     abroad = client.post(f"/api/rides/{offer_id}/start", headers=driver,
                          json={"lat": 48.85, "lng": 2.35})  # Paris
-    vague = client.post(f"/api/rides/{offer_id}/start", headers=driver,
-                        json={**KIGALI, "accuracy": 5000})
-    no_location = client.post(f"/api/rides/{offer_id}/start", headers=driver)
+    vague_track = client.post(f"/api/rides/{offer_id}/locations", headers=driver,
+                              json={**KIGALI, "accuracy": 5000})
+    vague_end = client.post(f"/api/rides/{offer_id}/end", headers=driver,
+                            json={**KIGALI, "accuracy": 5000})
+    track = client.get(f"/api/rides/{offer_id}/track", headers=driver).get_json()
 
     assert before_start.get_json()["error"]["code"] == "ride_not_on"
-    assert abroad.status_code == 400 and vague.status_code == 400
-    # Location is optional: a driver who doesn't share it can still drive.
-    assert no_location.status_code == 200
+    assert vague_track.status_code == 400
+    # Starting and ending never depend on the phone: an unusable position is
+    # just not recorded.
+    assert abroad.status_code == 200 and vague_end.status_code == 200
+    assert track["points"] == [] and track["ended_at"]
 
 
 def test_only_people_on_the_ride_see_where_it_went(client, ride, passenger):
